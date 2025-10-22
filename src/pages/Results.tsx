@@ -10,6 +10,7 @@ const Results = () => {
   const navigate = useNavigate();
   const { quizData, calculateScore, userAnswers } = useQuiz();
   const [result, setResult] = useState<ResultLevel | null>(null);
+  const [isLovableEnvironment, setIsLovableEnvironment] = useState(false);
 
   useEffect(() => {
     if (userAnswers.length === 0) {
@@ -22,6 +23,12 @@ const Results = () => {
       r => score >= r.minScore && score <= r.maxScore
     );
     setResult(matchedResult || null);
+
+    const isLovable = 
+      window.location.hostname.includes('lovable.app') || 
+      window.location.hostname.includes('lovable.dev') ||
+      window.location.hostname === 'localhost';
+    setIsLovableEnvironment(isLovable);
   }, [userAnswers, quizData.results, calculateScore, navigate]);
 
   if (!result) {
@@ -71,22 +78,24 @@ const Results = () => {
               />
             )}
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="flex gap-4 justify-center pt-8"
-            >
-              <Button
-                variant="outline"
-                onClick={() => navigate("/")}
+            {isLovableEnvironment && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                className="flex gap-4 justify-center pt-8"
               >
-                Take Quiz Again
-              </Button>
-              <Button onClick={() => navigate("/admin")}>
-                View Admin Panel
-              </Button>
-            </motion.div>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/")}
+                >
+                  Take Quiz Again
+                </Button>
+                <Button onClick={() => navigate("/admin")}>
+                  View Admin Panel
+                </Button>
+              </motion.div>
+            )}
           </div>
         </Card>
       </motion.div>
