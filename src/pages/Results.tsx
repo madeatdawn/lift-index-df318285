@@ -45,12 +45,9 @@ const Results = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <h1 className="text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
+              <h1 className="text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 {result.name}
               </h1>
-              <p className="text-xl text-muted-foreground mb-8">
-                Your Score: {score.toFixed(2)}
-              </p>
             </motion.div>
 
             <motion.div

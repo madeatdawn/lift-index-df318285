@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "@/contexts/QuizContext";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,17 @@ const Admin = () => {
   const navigate = useNavigate();
   const { quizData, updateQuizData } = useQuiz();
   const [editedData, setEditedData] = useState(quizData);
+
+  useEffect(() => {
+    const isLovableEnvironment = 
+      window.location.hostname.includes('lovable.app') || 
+      window.location.hostname.includes('lovable.dev') ||
+      window.location.hostname === 'localhost';
+    
+    if (!isLovableEnvironment) {
+      navigate("/");
+    }
+  }, [navigate]);
 
   const handleSave = () => {
     updateQuizData(editedData);
