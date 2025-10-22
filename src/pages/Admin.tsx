@@ -51,6 +51,7 @@ const Admin = () => {
     else if (field === "maxScore") newData.results[resultIndex].maxScore = parseFloat(value as string);
     else if (field === "description") newData.results[resultIndex].description = value as string;
     else if (field === "embedHTML") newData.results[resultIndex].embedHTML = value as string;
+    else if (field === "redirectUrl") newData.results[resultIndex].redirectUrl = value as string;
     setEditedData(newData);
   };
 
@@ -170,7 +171,19 @@ const Admin = () => {
 
                   <div>
                     <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                      Embed HTML Code
+                      Redirect URL
+                    </label>
+                    <Input
+                      type="url"
+                      value={result.redirectUrl}
+                      onChange={(e) => updateResult(rIndex, "redirectUrl", e.target.value)}
+                      placeholder="https://example.com/result-page"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                      Embed HTML Code (Optional)
                     </label>
                     <Textarea
                       value={result.embedHTML}

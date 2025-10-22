@@ -131,7 +131,8 @@ export const initialQuizData: QuizData = {
       minScore: 1.0,
       maxScore: 1.5,
       description: "Exploring, curious, discovering what lights you up.",
-      embedHTML: ""
+      embedHTML: "",
+      redirectUrl: "https://elanoura.com"
     },
     {
       id: "striving",
@@ -139,7 +140,8 @@ export const initialQuizData: QuizData = {
       minScore: 1.6,
       maxScore: 2.5,
       description: "Working hard, building momentum, seeking focus.",
-      embedHTML: ""
+      embedHTML: "",
+      redirectUrl: "https://elanoura.com"
     },
     {
       id: "steadfast",
@@ -147,7 +149,8 @@ export const initialQuizData: QuizData = {
       minScore: 2.6,
       maxScore: 3.5,
       description: "Stable, competent, ready for deeper meaning and authentic growth.",
-      embedHTML: ""
+      embedHTML: "",
+      redirectUrl: "https://elanoura.com"
     },
     {
       id: "shining",
@@ -155,7 +158,8 @@ export const initialQuizData: QuizData = {
       minScore: 3.6,
       maxScore: 4.5,
       description: "Experienced, aligned, mastering skills, stepping into authentic expression.",
-      embedHTML: ""
+      embedHTML: "",
+      redirectUrl: "https://elanoura.com"
     },
     {
       id: "significance",
@@ -163,7 +167,8 @@ export const initialQuizData: QuizData = {
       minScore: 4.6,
       maxScore: 5.0,
       description: "Fully living purpose, mentoring, leaving lasting impact.",
-      embedHTML: ""
+      embedHTML: "",
+      redirectUrl: "https://elanoura.com"
     }
   ]
 };

@@ -17,6 +17,7 @@ export interface ResultLevel {
   maxScore: number;
   description: string;
   embedHTML: string;
+  redirectUrl: string;
 }
 
 export interface QuizData {
