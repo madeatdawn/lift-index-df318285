@@ -11,6 +11,7 @@ const Quiz = () => {
   const { quizData, addAnswer, resetAnswers } = useQuiz();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [started, setStarted] = useState(false);
+  const [isAnswering, setIsAnswering] = useState(false);
 
   // Safety checks for quiz data
   if (!quizData || !quizData.questions || quizData.questions.length === 0) {
@@ -44,20 +45,26 @@ const Quiz = () => {
   };
 
   const handleAnswer = (optionId: string, value: number) => {
+    if (isAnswering) return; // Prevent multiple clicks
+    
+    setIsAnswering(true);
+    
     addAnswer({
       questionId: currentQuestion.id,
       selectedOptionId: optionId,
       value
     });
 
-    if (currentQuestionIndex < quizData.questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-    } else {
-      // Use setTimeout to ensure state is updated before navigation
-      setTimeout(() => {
+    // Wait for animation to complete before moving to next question
+    setTimeout(() => {
+      if (currentQuestionIndex < quizData.questions.length - 1) {
+        setCurrentQuestionIndex(prev => prev + 1);
+        setIsAnswering(false);
+      } else {
+        // Navigate to results after ensuring state is updated
         navigate("/results");
-      }, 100);
-    }
+      }
+    }, 400);
   };
 
   if (!started) {
@@ -132,6 +139,7 @@ const Quiz = () => {
                       variant="outline"
                       className="w-full text-left h-auto py-4 px-6 justify-start hover:bg-primary/5 hover:border-primary transition-all"
                       onClick={() => handleAnswer(option.id, option.value)}
+                      disabled={isAnswering}
                     >
                       <span className="font-medium text-primary mr-3">{option.id.toUpperCase()})</span>
                       <span className="text-foreground">{option.text}</span>
