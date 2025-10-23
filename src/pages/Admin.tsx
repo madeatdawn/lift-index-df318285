@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { ArrowLeft, Save } from "lucide-react";
+import { AdminPasswordGate } from "@/components/AdminPasswordGate";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -15,15 +16,8 @@ const Admin = () => {
   const [editedData, setEditedData] = useState(quizData);
 
   useEffect(() => {
-    const isLovableEnvironment = 
-      window.location.hostname.includes('lovable.app') || 
-      window.location.hostname.includes('lovable.dev') ||
-      window.location.hostname === 'localhost';
-    
-    if (!isLovableEnvironment) {
-      navigate("/");
-    }
-  }, [navigate]);
+    setEditedData(quizData);
+  }, [quizData]);
 
   const handleSave = () => {
     updateQuizData(editedData);
@@ -56,8 +50,9 @@ const Admin = () => {
   };
 
   return (
-    <div className="min-h-screen p-6" style={{ background: "var(--gradient-subtle)" }}>
-      <div className="max-w-6xl mx-auto space-y-6">
+    <AdminPasswordGate>
+      <div className="min-h-screen p-6" style={{ background: "var(--gradient-subtle)" }}>
+        <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" onClick={() => navigate("/")} size="icon">
@@ -197,8 +192,9 @@ const Admin = () => {
             ))}
           </TabsContent>
         </Tabs>
+        </div>
       </div>
-    </div>
+    </AdminPasswordGate>
   );
 };
 

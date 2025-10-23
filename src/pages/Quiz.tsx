@@ -30,7 +30,10 @@ const Quiz = () => {
     if (currentQuestionIndex < quizData.questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
-      navigate("/results");
+      // Use setTimeout to ensure state is updated before navigation
+      setTimeout(() => {
+        navigate("/results");
+      }, 100);
     }
   };
 

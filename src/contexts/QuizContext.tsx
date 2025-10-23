@@ -14,11 +14,15 @@ interface QuizContextType {
 const QuizContext = createContext<QuizContextType | undefined>(undefined);
 
 export const QuizProvider = ({ children }: { children: ReactNode }) => {
-  const [quizData, setQuizData] = useState<QuizData>(initialQuizData);
+  const [quizData, setQuizData] = useState<QuizData>(() => {
+    const saved = localStorage.getItem('quizData');
+    return saved ? JSON.parse(saved) : initialQuizData;
+  });
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
 
   const updateQuizData = (data: QuizData) => {
     setQuizData(data);
+    localStorage.setItem('quizData', JSON.stringify(data));
   };
 
   const addAnswer = (answer: UserAnswer) => {
