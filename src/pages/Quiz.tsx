@@ -12,7 +12,30 @@ const Quiz = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [started, setStarted] = useState(false);
 
+  // Safety checks for quiz data
+  if (!quizData || !quizData.questions || quizData.questions.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--gradient-subtle)" }}>
+        <Card className="p-8 text-center">
+          <p className="text-muted-foreground">Loading quiz data...</p>
+        </Card>
+      </div>
+    );
+  }
+
   const currentQuestion = quizData.questions[currentQuestionIndex];
+  
+  // Additional safety check for current question
+  if (!currentQuestion) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--gradient-subtle)" }}>
+        <Card className="p-8 text-center">
+          <p className="text-muted-foreground">Quiz data error. Please refresh the page.</p>
+        </Card>
+      </div>
+    );
+  }
+  
   const progress = ((currentQuestionIndex + 1) / quizData.questions.length) * 100;
 
   const handleStart = () => {

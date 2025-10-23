@@ -15,14 +15,30 @@ const QuizContext = createContext<QuizContextType | undefined>(undefined);
 
 export const QuizProvider = ({ children }: { children: ReactNode }) => {
   const [quizData, setQuizData] = useState<QuizData>(() => {
-    const saved = localStorage.getItem('quizData');
-    return saved ? JSON.parse(saved) : initialQuizData;
+    try {
+      const saved = localStorage.getItem('quizData');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Validate that the parsed data has the required structure
+        if (parsed.questions && Array.isArray(parsed.questions) && parsed.results && Array.isArray(parsed.results)) {
+          return parsed;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading quiz data from localStorage:', error);
+      localStorage.removeItem('quizData'); // Clear corrupted data
+    }
+    return initialQuizData;
   });
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
 
   const updateQuizData = (data: QuizData) => {
     setQuizData(data);
-    localStorage.setItem('quizData', JSON.stringify(data));
+    try {
+      localStorage.setItem('quizData', JSON.stringify(data));
+    } catch (error) {
+      console.error('Error saving quiz data to localStorage:', error);
+    }
   };
 
   const addAnswer = (answer: UserAnswer) => {
