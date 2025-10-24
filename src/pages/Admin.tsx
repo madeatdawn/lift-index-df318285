@@ -21,7 +21,6 @@ const Admin = () => {
 
   const handleSave = () => {
     updateQuizData(editedData);
-    toast.success("Quiz data saved successfully!");
   };
 
   const updateQuestion = (questionIndex: number, field: string, value: string) => {

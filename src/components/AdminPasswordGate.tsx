@@ -1,50 +1,30 @@
-import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Lock } from "lucide-react";
-import { toast } from "sonner";
-
-const ADMIN_PASSWORD = "HAEMADEATDAWNADMIN";
-const STORAGE_KEY = "admin_authenticated";
+import { Button } from "@/components/ui/button";
 
 interface AdminPasswordGateProps {
   children: React.ReactNode;
 }
 
 export const AdminPasswordGate = ({ children }: AdminPasswordGateProps) => {
-  const [password, setPassword] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+  const { user, isAdmin, loading } = useAuth();
 
-  useEffect(() => {
-    // Check if already authenticated in this session
-    const authenticated = sessionStorage.getItem(STORAGE_KEY);
-    if (authenticated === "true") {
-      setIsAuthenticated(true);
-    }
-    setIsLoading(false);
-  }, []);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem(STORAGE_KEY, "true");
-      toast.success("Access granted");
-    } else {
-      toast.error("Incorrect password");
-      setPassword("");
-    }
-  };
-
-  if (isLoading) {
-    return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--gradient-subtle)" }}>
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
-  if (!isAuthenticated) {
+  if (!user || !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--gradient-subtle)" }}>
         <motion.div
@@ -61,26 +41,21 @@ export const AdminPasswordGate = ({ children }: AdminPasswordGateProps) => {
               
               <div className="text-center space-y-2">
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  Admin Access
+                  Admin Access Required
                 </h1>
                 <p className="text-muted-foreground">
-                  Enter the password to access the admin panel
+                  You need admin privileges to access this page
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="w-full space-y-4">
-                <Input
-                  type="password"
-                  placeholder="Enter password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="text-center"
-                  autoFocus
-                />
-                <Button type="submit" className="w-full">
-                  Unlock Admin Panel
+              <div className="w-full space-y-3">
+                <Button onClick={() => navigate("/auth")} className="w-full">
+                  Sign In as Admin
                 </Button>
-              </form>
+                <Button onClick={() => navigate("/")} variant="outline" className="w-full">
+                  Back to Quiz
+                </Button>
+              </div>
             </div>
           </Card>
         </motion.div>

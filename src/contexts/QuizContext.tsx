@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { QuizData, UserAnswer } from "@/types/quiz";
 import { initialQuizData } from "@/data/quizData";
+import { useQuizDatabase } from "@/hooks/useQuizDatabase";
+import { toast } from "sonner";
 
 interface QuizContextType {
   quizData: QuizData;
@@ -9,35 +11,45 @@ interface QuizContextType {
   addAnswer: (answer: UserAnswer) => void;
   resetAnswers: () => void;
   calculateScore: () => number;
+  isLoading: boolean;
 }
 
 const QuizContext = createContext<QuizContextType | undefined>(undefined);
 
 export const QuizProvider = ({ children }: { children: ReactNode }) => {
-  const [quizData, setQuizData] = useState<QuizData>(() => {
-    try {
-      const saved = localStorage.getItem('quizData');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        // Validate that the parsed data has the required structure
-        if (parsed.questions && Array.isArray(parsed.questions) && parsed.results && Array.isArray(parsed.results)) {
-          return parsed;
-        }
-      }
-    } catch (error) {
-      console.error('Error loading quiz data from localStorage:', error);
-      localStorage.removeItem('quizData'); // Clear corrupted data
-    }
-    return initialQuizData;
-  });
+  const [quizData, setQuizData] = useState<QuizData>(initialQuizData);
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { fetchQuizData, saveQuizData } = useQuizDatabase();
 
-  const updateQuizData = (data: QuizData) => {
+  useEffect(() => {
+    loadQuizData();
+  }, []);
+
+  const loadQuizData = async () => {
+    setIsLoading(true);
+    const data = await fetchQuizData();
+    
+    if (data && data.questions.length > 0) {
+      // Use data from database
+      setQuizData(data);
+    } else {
+      // No data in database, use initial data and save it
+      setQuizData(initialQuizData);
+      await saveQuizData(initialQuizData);
+    }
+    
+    setIsLoading(false);
+  };
+
+  const updateQuizData = async (data: QuizData) => {
     setQuizData(data);
-    try {
-      localStorage.setItem('quizData', JSON.stringify(data));
-    } catch (error) {
-      console.error('Error saving quiz data to localStorage:', error);
+    const success = await saveQuizData(data);
+    
+    if (success) {
+      toast.success("Quiz data saved successfully!");
+    } else {
+      toast.error("Failed to save quiz data. Please try again.");
     }
   };
 
@@ -56,7 +68,7 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <QuizContext.Provider value={{ quizData, updateQuizData, userAnswers, addAnswer, resetAnswers, calculateScore }}>
+    <QuizContext.Provider value={{ quizData, updateQuizData, userAnswers, addAnswer, resetAnswers, calculateScore, isLoading }}>
       {children}
     </QuizContext.Provider>
   );

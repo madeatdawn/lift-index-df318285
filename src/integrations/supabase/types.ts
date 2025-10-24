@@ -14,16 +14,138 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      quiz_options: {
+        Row: {
+          created_at: string
+          id: string
+          option_id: string
+          question_id: string
+          sort_order: number
+          text: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_id: string
+          question_id: string
+          sort_order: number
+          text: string
+          updated_at?: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_id?: string
+          question_id?: string
+          sort_order?: number
+          text?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: []
+      }
+      quiz_questions: {
+        Row: {
+          created_at: string
+          id: string
+          question: string
+          question_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          question: string
+          question_id: string
+          sort_order: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          question?: string
+          question_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      quiz_results: {
+        Row: {
+          created_at: string
+          description: string
+          embed_html: string | null
+          id: string
+          max_score: number
+          min_score: number
+          name: string
+          redirect_url: string
+          result_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          embed_html?: string | null
+          id?: string
+          max_score: number
+          min_score: number
+          name: string
+          redirect_url: string
+          result_id: string
+          sort_order: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          embed_html?: string | null
+          id?: string
+          max_score?: number
+          min_score?: number
+          name?: string
+          redirect_url?: string
+          result_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +272,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
