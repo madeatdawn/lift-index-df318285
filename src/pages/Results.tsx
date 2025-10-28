@@ -5,7 +5,7 @@ import elanourIcon from "@/assets/elanoura-icon.svg";
 
 const Results = () => {
   const navigate = useNavigate();
-  const { quizData, calculateScore, userAnswers } = useQuiz();
+  const { quizData, calculateScore, userAnswers, resetAnswers } = useQuiz();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   useLayoutEffect(() => {
@@ -22,12 +22,13 @@ const Results = () => {
     if (matchedResult?.redirectUrl) {
       setIsRedirecting(true);
       setTimeout(() => {
+        resetAnswers(); // Clear saved progress before redirecting
         window.location.href = matchedResult.redirectUrl;
       }, 1500);
     } else {
       navigate("/");
     }
-  }, [userAnswers, quizData.results, calculateScore, navigate]);
+  }, [userAnswers, quizData.results, calculateScore, resetAnswers, navigate]);
 
   if (isRedirecting) {
     return (

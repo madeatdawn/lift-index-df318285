@@ -9,6 +9,7 @@ interface QuizContextType {
   updateQuizData: (data: QuizData) => void;
   userAnswers: UserAnswer[];
   addAnswer: (answer: UserAnswer) => void;
+  removeLastAnswer: () => void;
   resetAnswers: () => void;
   calculateScore: () => number;
   isLoading: boolean;
@@ -18,13 +19,22 @@ const QuizContext = createContext<QuizContextType | undefined>(undefined);
 
 export const QuizProvider = ({ children }: { children: ReactNode }) => {
   const [quizData, setQuizData] = useState<QuizData>(initialQuizData);
-  const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
+  const [userAnswers, setUserAnswers] = useState<UserAnswer[]>(() => {
+    // Load saved answers from localStorage
+    const saved = localStorage.getItem('quizAnswers');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [isLoading, setIsLoading] = useState(true);
   const { fetchQuizData, saveQuizData } = useQuizDatabase();
 
   useEffect(() => {
     loadQuizData();
   }, []);
+
+  // Save answers to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('quizAnswers', JSON.stringify(userAnswers));
+  }, [userAnswers]);
 
   const loadQuizData = async () => {
     setIsLoading(true);
@@ -57,8 +67,13 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
     setUserAnswers(prev => [...prev, answer]);
   };
 
+  const removeLastAnswer = () => {
+    setUserAnswers(prev => prev.slice(0, -1));
+  };
+
   const resetAnswers = () => {
     setUserAnswers([]);
+    localStorage.removeItem('quizAnswers');
   };
 
   const calculateScore = () => {
@@ -68,7 +83,7 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <QuizContext.Provider value={{ quizData, updateQuizData, userAnswers, addAnswer, resetAnswers, calculateScore, isLoading }}>
+    <QuizContext.Provider value={{ quizData, updateQuizData, userAnswers, addAnswer, removeLastAnswer, resetAnswers, calculateScore, isLoading }}>
       {children}
     </QuizContext.Provider>
   );

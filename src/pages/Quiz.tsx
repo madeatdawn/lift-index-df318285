@@ -8,9 +8,12 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const Quiz = () => {
   const navigate = useNavigate();
-  const { quizData, addAnswer, resetAnswers } = useQuiz();
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [started, setStarted] = useState(false);
+  const { quizData, addAnswer, removeLastAnswer, resetAnswers, userAnswers } = useQuiz();
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(() => {
+    // Resume from saved progress
+    return userAnswers.length > 0 ? userAnswers.length : 0;
+  });
+  const [started, setStarted] = useState(userAnswers.length > 0);
   const [isAnswering, setIsAnswering] = useState(false);
 
   // Safety checks for quiz data
@@ -69,6 +72,7 @@ const Quiz = () => {
 
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
+      removeLastAnswer();
       setCurrentQuestionIndex(prev => prev - 1);
     }
   };
