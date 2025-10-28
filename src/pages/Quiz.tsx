@@ -67,6 +67,12 @@ const Quiz = () => {
     }, 400);
   };
 
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(prev => prev - 1);
+    }
+  };
+
   if (!started) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--gradient-subtle)" }}>
@@ -112,6 +118,16 @@ const Quiz = () => {
             <span>{Math.round(progress)}% Complete</span>
           </div>
           <Progress value={progress} className="h-2" />
+          {currentQuestionIndex > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handlePrevious}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              ← Previous Question
+            </Button>
+          )}
         </div>
 
         <AnimatePresence mode="wait">
