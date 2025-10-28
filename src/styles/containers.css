@@ -25,7 +25,7 @@
 /* Elevated card with gradient and shadow */
 .card-elevated {
   background: var(--gradient-card);
-  box-shadow: var(--shadow-elegant);
+  box-shadow: none;
 }
 
 /* Results loading container - centered flex column */
