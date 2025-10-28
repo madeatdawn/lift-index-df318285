@@ -24,7 +24,7 @@
 
 /* Elevated card with gradient and shadow */
 .card-elevated {
-  background: var(--gradient-card);
+  background: transparent !important;
   box-shadow: none !important;
 }
 
