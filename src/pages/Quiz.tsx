@@ -19,7 +19,7 @@ const Quiz = () => {
   // Safety checks for quiz data
   if (!quizData || !quizData.questions || quizData.questions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--gradient-subtle)" }}>
+      <div className="page-container">
         <Card className="p-8 text-center">
           <p className="text-muted-foreground">Loading quiz data...</p>
         </Card>
@@ -32,7 +32,7 @@ const Quiz = () => {
   // Additional safety check for current question
   if (!currentQuestion) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--gradient-subtle)" }}>
+      <div className="page-container">
         <Card className="p-8 text-center">
           <p className="text-muted-foreground">Quiz data error. Please refresh the page.</p>
         </Card>
@@ -79,14 +79,14 @@ const Quiz = () => {
 
   if (!started) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--gradient-subtle)" }}>
+      <div className="page-container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="max-w-2xl w-full"
+          className="content-container-narrow"
         >
-          <Card className="p-12 text-center" style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-elegant)" }}>
+          <Card className="card-elevated p-12 text-center">
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
@@ -114,9 +114,9 @@ const Quiz = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--gradient-subtle)" }}>
-      <div className="max-w-4xl w-full space-y-6">
-        <div className="space-y-2">
+    <div className="page-container">
+      <div className="content-container space-y-6">
+        <div className="quiz-progress-section">
           <div className="flex justify-between items-center text-sm text-muted-foreground">
             <span>Question {currentQuestionIndex + 1} of {quizData.questions.length}</span>
             <span>{Math.round(progress)}% Complete</span>
@@ -142,7 +142,7 @@ const Quiz = () => {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="p-8" style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-elegant)" }}>
+            <Card className="card-elevated p-8">
               <h2 className="text-2xl font-bold mb-8 text-foreground">
                 {currentQuestion.question}
               </h2>

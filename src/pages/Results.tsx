@@ -32,8 +32,8 @@ const Results = () => {
 
   if (isRedirecting) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center">
+      <div className="page-container">
+        <div className="results-loading-container">
           <img 
             src={elanourIcon} 
             alt="Élanoura" 
