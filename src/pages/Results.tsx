@@ -1,10 +1,12 @@
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "@/contexts/QuizContext";
+import elanourIcon from "@/assets/elanoura-icon.svg";
 
 const Results = () => {
   const navigate = useNavigate();
   const { quizData, calculateScore, userAnswers } = useQuiz();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   useLayoutEffect(() => {
     if (userAnswers.length === 0) {
@@ -18,11 +20,37 @@ const Results = () => {
     );
 
     if (matchedResult?.redirectUrl) {
-      window.location.href = matchedResult.redirectUrl;
+      setIsRedirecting(true);
+      setTimeout(() => {
+        window.location.href = matchedResult.redirectUrl;
+      }, 1500);
     } else {
       navigate("/");
     }
   }, [userAnswers, quizData.results, calculateScore, navigate]);
+
+  if (isRedirecting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center">
+          <img 
+            src={elanourIcon} 
+            alt="Élanoura" 
+            className="w-[70px] h-auto"
+          />
+          <p 
+            className="mt-[40px] text-[50px] leading-tight"
+            style={{ 
+              fontFamily: "'Editors Note', serif",
+              color: '#DBABA0'
+            }}
+          >
+            Loading your results...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return null;
 };
