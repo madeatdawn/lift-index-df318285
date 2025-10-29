@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
+import elanourIcon from "@/assets/elanoura-icon.svg";
 
 const Quiz = () => {
   const navigate = useNavigate();
@@ -81,6 +82,16 @@ const Quiz = () => {
   if (!started) {
     return (
       <div className="page-container">
+        {/* Logo */}
+        <a 
+          href="https://elanoura.com/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="absolute top-[30px] left-1/2 -translate-x-1/2 z-10"
+        >
+          <img src={elanourIcon} alt="Élanoura" className="w-[80px]" />
+        </a>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -95,7 +106,7 @@ const Quiz = () => {
             >
               <h1 
                 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
-                style={{ fontStyle: 'normal' }}
+                style={{ fontFamily: 'EditorsNote-Extralight', fontStyle: 'normal' }}
               >
                 LIFT Index Quiz
               </h1>
@@ -119,16 +130,25 @@ const Quiz = () => {
 
   return (
     <div className="min-h-screen bg-background relative flex flex-col">
+      {/* Logo */}
+      <a 
+        href="https://elanoura.com/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="absolute top-[30px] left-1/2 -translate-x-1/2 z-10"
+      >
+        <img src={elanourIcon} alt="Élanoura" className="w-[80px]" />
+      </a>
+
       {/* Back button - absolute positioned */}
-      {currentQuestionIndex > 0 && (
-        <button
-          onClick={handlePrevious}
-          className="absolute top-8 left-8 text-foreground hover:opacity-60 transition-opacity z-10"
-          aria-label="Previous question"
-        >
-          <ArrowLeft className="h-6 w-6" />
-        </button>
-      )}
+      <button
+        onClick={currentQuestionIndex === 0 ? () => setStarted(false) : handlePrevious}
+        className="absolute top-8 left-8 text-foreground z-10 border-b border-foreground pb-1"
+        aria-label="Previous question"
+        style={{ borderWidth: '1px', paddingBottom: '4px' }}
+      >
+        <ArrowLeft className="h-6 w-6" />
+      </button>
 
       {/* Main content - centered */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-16">
@@ -138,7 +158,7 @@ const Quiz = () => {
             <div className="text-sm text-muted-foreground">
               Question {currentQuestionIndex + 1} of {quizData.questions.length}
             </div>
-            <Progress value={progress} className="h-1.5 max-w-xs mx-auto" />
+            <Progress value={progress} className="h-1 max-w-xs mx-auto" />
           </div>
 
           <AnimatePresence mode="wait">
@@ -156,7 +176,7 @@ const Quiz = () => {
               </h2>
 
               {/* Options grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+              <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
                 {currentQuestion.options.map((option, index) => (
                   <motion.div
                     key={option.id}
@@ -167,7 +187,12 @@ const Quiz = () => {
                     <button
                       onClick={() => handleAnswer(option.id, option.value)}
                       disabled={isAnswering}
-                      className="w-full bg-card hover:bg-card/80 text-foreground rounded-3xl py-8 px-6 text-center transition-all hover:shadow-lg disabled:opacity-50 border border-border/50"
+                      className="w-full text-foreground rounded-3xl py-8 px-6 text-center disabled:opacity-50 border border-border/50 transition-opacity duration-300"
+                      style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.7)'}
                     >
                       <span className="text-lg">{option.text}</span>
                     </button>
@@ -179,22 +204,9 @@ const Quiz = () => {
         </div>
       </div>
 
-      {/* Decorative wave at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none overflow-hidden">
-        <svg
-          className="absolute bottom-0 w-full"
-          viewBox="0 0 1200 40"
-          preserveAspectRatio="none"
-          style={{ height: '40px' }}
-        >
-          <path
-            d="M0,20 Q150,10 300,20 T600,20 T900,20 T1200,20 L1200,40 L0,40 Z"
-            fill="none"
-            stroke="hsl(var(--border))"
-            strokeWidth="1"
-            opacity="0.5"
-          />
-        </svg>
+      {/* Percentage progress - bottom right */}
+      <div className="absolute bottom-8 right-8 text-foreground z-10" style={{ fontSize: '13px' }}>
+        {Math.round(progress)}%
       </div>
     </div>
   );
