@@ -32,7 +32,7 @@ const Results = () => {
             className="w-[70px] h-auto"
           />
           <p 
-            className="mt-[40px] text-[50px] leading-tight"
+            className="mt-[40px] text-[50px] leading-tight text-center"
             style={{ 
               fontFamily: "'Editors Note', serif",
               fontStyle: 'italic',
@@ -56,7 +56,7 @@ const Results = () => {
           className="w-[70px] h-auto"
         />
         <p 
-          className="mt-[40px] text-[50px] leading-tight"
+          className="mt-[40px] text-[50px] leading-tight text-center"
           style={{ 
             fontFamily: "'Editors Note', serif",
             fontStyle: 'italic',
