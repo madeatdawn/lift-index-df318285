@@ -160,3 +160,10 @@ All colors MUST be HSL.
 .text-center {
     border: none !important;
 }
+
+body, * {
+    font-variant-ligatures: common-ligatures;
+    font-feature-settings: "liga" 1; /* Explicitly enable standard ligatures */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: auto;
+}

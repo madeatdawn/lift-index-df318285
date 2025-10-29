@@ -7,7 +7,7 @@
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: var(--gradient-subtle);
+  background: #F6F2EE;
 }
 
 /* Content wrapper with max width - for quiz/results content */
@@ -40,11 +40,4 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
-
-body, * {
-    font-variant-ligatures: common-ligatures;
-    font-feature-settings: "liga" 1; /* Explicitly enable standard ligatures */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: auto;
 }
