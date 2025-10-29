@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "@/contexts/QuizContext";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,24 @@ const Quiz = () => {
   });
   const [started, setStarted] = useState(userAnswers.length > 0);
   const [isAnswering, setIsAnswering] = useState(false);
+
+  // Keyboard support for selecting answers
+  useEffect(() => {
+    if (!started || isAnswering || !currentQuestion) return;
+
+    const handleKeyPress = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      const keyIndex = key.charCodeAt(0) - 97; // 'a' = 0, 'b' = 1, etc.
+      
+      if (keyIndex >= 0 && keyIndex < currentQuestion.options.length) {
+        const option = currentQuestion.options[keyIndex];
+        handleAnswer(option.id, option.value);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [started, isAnswering, currentQuestionIndex]);
 
   // Safety checks for quiz data
   if (!quizData || !quizData.questions || quizData.questions.length === 0) {
