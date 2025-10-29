@@ -216,10 +216,13 @@ const Quiz = () => {
                             fontFamily: 'Body, sans-serif',
                             letterSpacing: '0.03em',
                             fontWeight: 400,
-                            lineHeight: '1em'
+                            lineHeight: '1.5em',
+                            display: 'flex',
+                            gap: '18px'
                           }}
                         >
-                          <span style={{ color: '#DBABA0', marginRight: '18px' }}>{optionLabel})</span>{option.text}
+                          <span style={{ color: '#DBABA0', flexShrink: 0 }}>{optionLabel})</span>
+                          <span>{option.text}</span>
                         </span>
                       </button>
                     </motion.div>
