@@ -9,26 +9,18 @@ const Results = () => {
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   useLayoutEffect(() => {
-    if (userAnswers.length === 0) {
-      navigate("/", { replace: true });
-      return;
-    }
-
     const score = calculateScore();
     const matchedResult = quizData.results.find(
       r => score >= r.minScore && score <= r.maxScore
     );
 
-    if (matchedResult?.redirectUrl) {
+    if (matchedResult?.redirectUrl && userAnswers.length > 0) {
       setIsRedirecting(true);
-      // Clear saved progress before redirecting
+      // Clear saved progress and redirect
       resetAnswers();
-      // Redirect immediately
       window.location.href = matchedResult.redirectUrl;
-    } else {
-      navigate("/", { replace: true });
     }
-  }, [userAnswers, quizData.results, calculateScore, resetAnswers, navigate]);
+  }, [userAnswers, quizData.results, calculateScore, resetAnswers]);
 
   if (isRedirecting) {
     return (
@@ -55,7 +47,28 @@ const Results = () => {
     );
   }
 
-  return null;
+  return (
+    <div className="page-container">
+      <div className="results-loading-container">
+        <img 
+          src={elanourIcon} 
+          alt="Élanoura" 
+          className="w-[70px] h-auto"
+        />
+        <p 
+          className="mt-[40px] text-[50px] leading-tight"
+          style={{ 
+            fontFamily: "'Editors Note', serif",
+            fontStyle: 'italic',
+            fontWeight: 200,
+            color: '#DBABA0'
+          }}
+        >
+          Loading your results...
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default Results;

@@ -65,8 +65,8 @@ const Quiz = () => {
         setCurrentQuestionIndex(prev => prev + 1);
         setIsAnswering(false);
       } else {
-        // Navigate to results after ensuring state is updated
-        navigate("/results");
+        // Navigate to results - don't set isAnswering to false so we stay in loading state
+        navigate("/results", { replace: true });
       }
     }, 400);
   };
@@ -166,16 +166,14 @@ const Quiz = () => {
         </AnimatePresence>
 
         {currentQuestionIndex > 0 && (
-          <div className="pt-4 pb-2">
-            <Button
-              variant="ghost"
-              size="sm"
+          <div className="pt-4">
+            <button
               onClick={handlePrevious}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground pb-1 border-b border-muted-foreground"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" />
+              <ArrowLeft className="inline mr-2 h-4 w-4" />
               Previous question
-            </Button>
+            </button>
           </div>
         )}
       </div>
