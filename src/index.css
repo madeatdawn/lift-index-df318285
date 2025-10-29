@@ -195,3 +195,6 @@ span.text-foreground, .font-medium {
 .text-balance {
     margin: 50px 0 !important;
 }
+.text-foreground.z-10 {
+    font-size: 40px !important;
+}
