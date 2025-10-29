@@ -205,7 +205,7 @@ const Quiz = () => {
               className="space-y-8"
             >
               {/* Question */}
-              <h2 className="text-3xl md:text-4xl font-bold text-center text-foreground">
+              <h2 className="text-3xl md:text-4xl font-bold text-center text-foreground text-balance">
                 {currentQuestion.question}
               </h2>
 
