@@ -152,11 +152,6 @@ All colors MUST be HSL.
     font-family: 'Conso Serif', serif;
   }
 }
-
-.text-transparent {
-    font-family: 'Editors Note' !important;
-    font-weight: 200;
-}
 .text-center {
     border: none !important;
 }
@@ -167,3 +162,24 @@ body, * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: auto;
 }
+.text-transparent {
+    font-family: 'Editors Note';
+    font-weight: 200;
+}
+.font-semibold {
+    font-family: 'Body' !important;
+    font-weight: 400;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-radius: 10000px;
+}
+span.text-foreground, .font-medium {
+    font-family: 'Body' !important;
+    letter-spacing: 0.03em;
+    font-weight: 400;
+}
+.font-bold {
+    font-weight: 200;
+}
+
