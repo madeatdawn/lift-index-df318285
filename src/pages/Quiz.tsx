@@ -41,7 +41,7 @@ const Quiz = () => {
     );
   }
   
-  const progress = ((currentQuestionIndex + 1) / quizData.questions.length) * 100;
+  const progress = (userAnswers.length / quizData.questions.length) * 100;
 
   const handleStart = () => {
     resetAnswers();
@@ -93,7 +93,10 @@ const Quiz = () => {
               animate={{ scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <h1 
+                className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
+                style={{ fontStyle: 'normal' }}
+              >
                 LIFT Index Quiz
               </h1>
               <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
@@ -163,15 +166,17 @@ const Quiz = () => {
         </AnimatePresence>
 
         {currentQuestionIndex > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handlePrevious}
-            className="absolute bottom-0 left-0 text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Previous Question
-          </Button>
+          <div className="pt-4 pb-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handlePrevious}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Previous question
+            </Button>
+          </div>
         )}
       </div>
     </div>

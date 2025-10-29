@@ -10,7 +10,7 @@ const Results = () => {
 
   useLayoutEffect(() => {
     if (userAnswers.length === 0) {
-      navigate("/");
+      navigate("/", { replace: true });
       return;
     }
 
@@ -21,12 +21,12 @@ const Results = () => {
 
     if (matchedResult?.redirectUrl) {
       setIsRedirecting(true);
-      setTimeout(() => {
-        resetAnswers(); // Clear saved progress before redirecting
-        window.location.href = matchedResult.redirectUrl;
-      }, 1500);
+      // Clear saved progress before redirecting
+      resetAnswers();
+      // Redirect immediately
+      window.location.href = matchedResult.redirectUrl;
     } else {
-      navigate("/");
+      navigate("/", { replace: true });
     }
   }, [userAnswers, quizData.results, calculateScore, resetAnswers, navigate]);
 
