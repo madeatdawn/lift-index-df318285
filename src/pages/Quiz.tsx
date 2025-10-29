@@ -17,6 +17,7 @@ const Quiz = () => {
   });
   const [started, setStarted] = useState(userAnswers.length > 0);
   const [isAnswering, setIsAnswering] = useState(false);
+  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
 
   // Keyboard support for selecting answers
   useEffect(() => {
@@ -28,6 +29,7 @@ const Quiz = () => {
       
       if (keyIndex >= 0 && keyIndex < currentQuestion.options.length) {
         const option = currentQuestion.options[keyIndex];
+        setSelectedOptionId(option.id);
         handleAnswer(option.id, option.value);
       }
     };
@@ -35,6 +37,11 @@ const Quiz = () => {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [started, isAnswering, currentQuestionIndex]);
+
+  // Reset selected option when question changes
+  useEffect(() => {
+    setSelectedOptionId(null);
+  }, [currentQuestionIndex]);
 
   // Safety checks for quiz data
   if (!quizData || !quizData.questions || quizData.questions.length === 0) {
@@ -214,7 +221,10 @@ const Quiz = () => {
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                     >
                       <button
-                        onClick={() => handleAnswer(option.id, option.value)}
+                        onClick={() => {
+                          setSelectedOptionId(option.id);
+                          handleAnswer(option.id, option.value);
+                        }}
                         disabled={isAnswering}
                         className="w-full text-foreground rounded-3xl py-5 px-6 text-left disabled:opacity-50 group relative overflow-hidden"
                         style={{ 
@@ -222,7 +232,7 @@ const Quiz = () => {
                         }}
                       >
                         <div 
-                          className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 pointer-events-none"
+                          className={`absolute inset-0 rounded-3xl pointer-events-none ${selectedOptionId === option.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                           style={{
                             background: 'linear-gradient(135deg, rgba(219, 171, 160, 0.3), rgba(196, 175, 198, 0.3))',
                             transition: 'opacity 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)'
