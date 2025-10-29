@@ -145,3 +145,11 @@ All colors MUST be HSL.
     font-family: 'Conso Serif', serif;
   }
 }
+
+.text-transparent {
+    font-family: 'Editors Note' !important;
+    font-weight: 200;
+}
+.text-center {
+    border: none !important;
+}
