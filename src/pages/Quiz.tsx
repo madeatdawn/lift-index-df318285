@@ -82,15 +82,15 @@ const Quiz = () => {
   if (!started) {
     return (
       <div className="page-container">
-        {/* Logo */}
-        <a 
-          href="https://elanoura.com/" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="absolute top-[30px] left-1/2 -translate-x-1/2 z-10"
-        >
-          <img src={elanourIcon} alt="Élanoura" className="w-[80px]" />
-        </a>
+      {/* Logo */}
+      <a 
+        href="https://elanoura.com/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="absolute top-[30px] left-1/2 -translate-x-1/2 z-10"
+      >
+        <img src={elanourIcon} alt="Élanoura" className="w-[50px]" />
+      </a>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -105,8 +105,8 @@ const Quiz = () => {
               transition={{ duration: 0.5, delay: 0.2 }}
             >
               <h1 
-                className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
-                style={{ fontFamily: 'EditorsNote-Extralight', fontStyle: 'normal' }}
+                className="text-5xl mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
+                style={{ fontFamily: 'EditorsNote-Extralight', fontStyle: 'normal', fontWeight: 200 }}
               >
                 LIFT Index Quiz
               </h1>
@@ -137,17 +137,21 @@ const Quiz = () => {
         rel="noopener noreferrer"
         className="absolute top-[30px] left-1/2 -translate-x-1/2 z-10"
       >
-        <img src={elanourIcon} alt="Élanoura" className="w-[80px]" />
+        <img src={elanourIcon} alt="Élanoura" className="w-[50px]" />
       </a>
 
       {/* Back button - absolute positioned */}
       <button
         onClick={currentQuestionIndex === 0 ? () => setStarted(false) : handlePrevious}
-        className="absolute top-8 left-8 text-foreground z-10 border-b border-foreground pb-1"
+        className="absolute top-8 left-8 z-10 rounded-full p-3 transition-all duration-300"
         aria-label="Previous question"
-        style={{ borderWidth: '1px', paddingBottom: '4px' }}
+        style={{ 
+          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fff'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.7)'}
       >
-        <ArrowLeft className="h-6 w-6" />
+        <ArrowLeft className="h-5 w-5" strokeWidth={1.5} />
       </button>
 
       {/* Main content - centered */}
@@ -187,14 +191,24 @@ const Quiz = () => {
                     <button
                       onClick={() => handleAnswer(option.id, option.value)}
                       disabled={isAnswering}
-                      className="w-full text-foreground rounded-3xl py-8 px-6 text-center disabled:opacity-50 border border-border/50 transition-opacity duration-300"
+                      className="w-full text-foreground rounded-3xl py-5 px-6 text-left disabled:opacity-50 border transition-all duration-300 group"
                       style={{ 
                         backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                        borderColor: 'rgba(196, 175, 198, 0.3)',
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.7)'}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#fff';
+                        e.currentTarget.style.borderImage = 'linear-gradient(135deg, #C4AFC6, #441725) 1';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+                        e.currentTarget.style.borderImage = 'none';
+                        e.currentTarget.style.borderColor = 'rgba(196, 175, 198, 0.3)';
+                      }}
                     >
-                      <span className="text-lg">{option.text}</span>
+                      <span className="text-base group-hover:bg-gradient-to-r group-hover:from-[#C4AFC6] group-hover:to-[#441725] group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
+                        {option.text}
+                      </span>
                     </button>
                   </motion.div>
                 ))}
