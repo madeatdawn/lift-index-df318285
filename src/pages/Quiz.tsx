@@ -118,64 +118,83 @@ const Quiz = () => {
   }
 
   return (
-    <div className="page-container">
-      <div className="content-container space-y-6 relative">
-        <div className="quiz-progress-section">
-          <div className="flex justify-between items-center text-sm text-muted-foreground">
-            <span>Question {currentQuestionIndex + 1} of {quizData.questions.length}</span>
-            <span>{Math.round(progress)}% Complete</span>
-          </div>
-          <Progress value={progress} className="h-2" />
-        </div>
+    <div className="min-h-screen bg-background relative flex flex-col">
+      {/* Back button - absolute positioned */}
+      {currentQuestionIndex > 0 && (
+        <button
+          onClick={handlePrevious}
+          className="absolute top-8 left-8 text-foreground hover:opacity-60 transition-opacity z-10"
+          aria-label="Previous question"
+        >
+          <ArrowLeft className="h-6 w-6" />
+        </button>
+      )}
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentQuestion.id}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card className="card-elevated p-8">
-              <h2 className="text-2xl font-bold mb-8 text-foreground">
+      {/* Main content - centered */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-16">
+        <div className="w-full max-w-3xl space-y-12">
+          {/* Progress indicator */}
+          <div className="text-center space-y-2">
+            <div className="text-sm text-muted-foreground">
+              Question {currentQuestionIndex + 1} of {quizData.questions.length}
+            </div>
+            <Progress value={progress} className="h-1.5 max-w-xs mx-auto" />
+          </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentQuestion.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+              className="space-y-8"
+            >
+              {/* Question */}
+              <h2 className="text-3xl md:text-4xl font-bold text-center text-foreground">
                 {currentQuestion.question}
               </h2>
 
-              <div className="space-y-3">
+              {/* Options grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
                 {currentQuestion.options.map((option, index) => (
                   <motion.div
                     key={option.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3, delay: index * 0.1 }}
                   >
-                    <Button
-                      variant="outline"
-                      className="w-full text-left h-auto py-4 px-6 justify-start hover:bg-primary/5 hover:border-primary transition-all"
+                    <button
                       onClick={() => handleAnswer(option.id, option.value)}
                       disabled={isAnswering}
+                      className="w-full bg-card hover:bg-card/80 text-foreground rounded-3xl py-8 px-6 text-center transition-all hover:shadow-lg disabled:opacity-50 border border-border/50"
                     >
-                      <span className="font-medium text-primary mr-3">{option.id.toUpperCase()})</span>
-                      <span className="text-foreground">{option.text}</span>
-                    </Button>
+                      <span className="text-lg">{option.text}</span>
+                    </button>
                   </motion.div>
                 ))}
               </div>
-            </Card>
-          </motion.div>
-        </AnimatePresence>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
 
-        {currentQuestionIndex > 0 && (
-          <div className="pt-4">
-            <button
-              onClick={handlePrevious}
-              className="text-muted-foreground pb-1 border-b border-muted-foreground"
-            >
-              <ArrowLeft className="inline mr-2 h-4 w-4" />
-              Previous question
-            </button>
-          </div>
-        )}
+      {/* Decorative wave at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none overflow-hidden">
+        <svg
+          className="absolute bottom-0 w-full"
+          viewBox="0 0 1200 40"
+          preserveAspectRatio="none"
+          style={{ height: '40px' }}
+        >
+          <path
+            d="M0,20 Q150,10 300,20 T600,20 T900,20 T1200,20 L1200,40 L0,40 Z"
+            fill="none"
+            stroke="hsl(var(--border))"
+            strokeWidth="1"
+            opacity="0.5"
+          />
+        </svg>
       </div>
     </div>
   );
