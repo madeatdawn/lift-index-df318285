@@ -18,6 +18,7 @@ const Quiz = () => {
   const [started, setStarted] = useState(userAnswers.length > 0);
   const [isAnswering, setIsAnswering] = useState(false);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  const [displayedProgress, setDisplayedProgress] = useState(0);
 
   // Keyboard support for selecting answers
   useEffect(() => {
@@ -42,6 +43,28 @@ const Quiz = () => {
   useEffect(() => {
     setSelectedOptionId(null);
   }, [currentQuestionIndex]);
+
+  // Animate progress percentage counting
+  useEffect(() => {
+    const targetProgress = (userAnswers.length / quizData.questions.length) * 100;
+    const duration = 300; // milliseconds
+    const steps = 20;
+    const increment = (targetProgress - displayedProgress) / steps;
+    const stepDuration = duration / steps;
+
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      currentStep++;
+      if (currentStep >= steps) {
+        setDisplayedProgress(targetProgress);
+        clearInterval(interval);
+      } else {
+        setDisplayedProgress(prev => prev + increment);
+      }
+    }, stepDuration);
+
+    return () => clearInterval(interval);
+  }, [userAnswers.length, quizData.questions.length]);
 
   // Safety checks for quiz data
   if (!quizData || !quizData.questions || quizData.questions.length === 0) {
@@ -264,7 +287,7 @@ const Quiz = () => {
 
       {/* Percentage progress - bottom right */}
       <div className="absolute bottom-8 right-8 text-foreground z-10" style={{ fontSize: '13px' }}>
-        {Math.round(progress)}%
+        {Math.round(displayedProgress)}%
       </div>
     </div>
   );
