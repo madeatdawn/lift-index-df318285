@@ -192,3 +192,6 @@ span.text-foreground, .font-medium {
     font-weight: 200;
 }
 
+.text-balance {
+    margin: 50px 0 !important;
+}
