@@ -106,7 +106,7 @@ const Quiz = () => {
             >
               <h1 
                 className="text-5xl mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
-                style={{ fontFamily: 'EditorsNote-Extralight', fontStyle: 'normal', fontWeight: 200 }}
+                style={{ fontFamily: 'EditorsNote-Extralight, sans-serif', fontStyle: 'normal', fontWeight: 200 }}
               >
                 LIFT Index Quiz
               </h1>
@@ -130,32 +130,37 @@ const Quiz = () => {
 
   return (
     <div className="min-h-screen bg-background relative flex flex-col">
-      {/* Logo */}
-      <a 
-        href="https://elanoura.com/" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="absolute top-[30px] left-1/2 -translate-x-1/2 z-10"
-      >
-        <img src={elanourIcon} alt="Élanoura" className="w-[50px]" />
-      </a>
+      {/* Header section with Logo and Back button */}
+      <div className="relative w-full py-8 px-4 md:px-8">
+        <div className="flex items-center justify-center relative max-w-3xl mx-auto">
+          {/* Back button - left side */}
+          <button
+            onClick={currentQuestionIndex === 0 ? () => setStarted(false) : handlePrevious}
+            className="absolute left-0 rounded-full p-3 transition-all duration-300"
+            aria-label="Previous question"
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fff'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.7)'}
+          >
+            <ArrowLeft className="h-5 w-5" strokeWidth={1.5} />
+          </button>
 
-      {/* Back button - absolute positioned */}
-      <button
-        onClick={currentQuestionIndex === 0 ? () => setStarted(false) : handlePrevious}
-        className="absolute top-8 left-8 z-10 rounded-full p-3 transition-all duration-300"
-        aria-label="Previous question"
-        style={{ 
-          backgroundColor: 'rgba(255, 255, 255, 0.7)',
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fff'}
-        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.7)'}
-      >
-        <ArrowLeft className="h-5 w-5" strokeWidth={1.5} />
-      </button>
+          {/* Logo - centered */}
+          <a 
+            href="https://elanoura.com/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="z-10"
+          >
+            <img src={elanourIcon} alt="Élanoura" className="w-[50px]" />
+          </a>
+        </div>
+      </div>
 
       {/* Main content - centered */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-16">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-16">
         <div className="w-full max-w-3xl space-y-12">
           {/* Progress indicator */}
           <div className="text-center space-y-2">
@@ -181,37 +186,44 @@ const Quiz = () => {
 
               {/* Options grid */}
               <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
-                {currentQuestion.options.map((option, index) => (
-                  <motion.div
-                    key={option.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                  >
-                    <button
-                      onClick={() => handleAnswer(option.id, option.value)}
-                      disabled={isAnswering}
-                      className="w-full text-foreground rounded-3xl py-5 px-6 text-left disabled:opacity-50 border transition-all duration-300 group"
-                      style={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                        borderColor: 'rgba(196, 175, 198, 0.3)',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#fff';
-                        e.currentTarget.style.borderImage = 'linear-gradient(135deg, #C4AFC6, #441725) 1';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
-                        e.currentTarget.style.borderImage = 'none';
-                        e.currentTarget.style.borderColor = 'rgba(196, 175, 198, 0.3)';
-                      }}
+                {currentQuestion.options.map((option, index) => {
+                  const optionLabel = String.fromCharCode(65 + index); // A, B, C, D...
+                  return (
+                    <motion.div
+                      key={option.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
                     >
-                      <span className="text-base group-hover:bg-gradient-to-r group-hover:from-[#C4AFC6] group-hover:to-[#441725] group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
-                        {option.text}
-                      </span>
-                    </button>
-                  </motion.div>
-                ))}
+                      <button
+                        onClick={() => handleAnswer(option.id, option.value)}
+                        disabled={isAnswering}
+                        className="w-full text-foreground rounded-3xl py-5 px-6 text-left disabled:opacity-50 transition-all duration-300 group"
+                        style={{ 
+                          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #DBABA0, #C4AFC6)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
+                        }}
+                      >
+                        <span 
+                          style={{ 
+                            fontSize: '14px',
+                            fontFamily: 'Body, sans-serif',
+                            letterSpacing: '0.03em',
+                            fontWeight: 400,
+                            lineHeight: '1em'
+                          }}
+                        >
+                          {optionLabel}) {option.text}
+                        </span>
+                      </button>
+                    </motion.div>
+                  );
+                })}
               </div>
             </motion.div>
           </AnimatePresence>
