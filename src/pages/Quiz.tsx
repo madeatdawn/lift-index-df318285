@@ -201,7 +201,7 @@ const Quiz = () => {
                         className="w-full text-foreground rounded-3xl py-5 px-6 text-left disabled:opacity-50 group relative overflow-hidden"
                         style={{ 
                           background: 'rgba(255, 255, 255, 0.7)',
-                          transition: 'background 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+                          transition: 'background 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)'
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.background = 'linear-gradient(135deg, rgba(219, 171, 160, 0.3), rgba(196, 175, 198, 0.3))';
