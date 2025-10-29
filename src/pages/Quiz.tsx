@@ -219,7 +219,7 @@ const Quiz = () => {
                             lineHeight: '1em'
                           }}
                         >
-                          <span style={{ color: '#DBABA0' }}>{optionLabel})</span>{' '}{option.text}
+                          <span style={{ color: '#DBABA0', marginRight: '8px' }}>{optionLabel})</span>{option.text}
                         </span>
                       </button>
                     </motion.div>
