@@ -198,12 +198,13 @@ const Quiz = () => {
                       <button
                         onClick={() => handleAnswer(option.id, option.value)}
                         disabled={isAnswering}
-                        className="w-full text-foreground rounded-3xl py-5 px-6 text-left disabled:opacity-50 transition-all duration-300 group"
+                        className="w-full text-foreground rounded-3xl py-5 px-6 text-left disabled:opacity-50 group"
                         style={{ 
                           backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                          transition: 'all 0.3s ease 0.1s'
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, #DBABA0, #C4AFC6)';
+                          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(219, 171, 160, 0.3), rgba(196, 175, 198, 0.3))';
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
@@ -218,7 +219,7 @@ const Quiz = () => {
                             lineHeight: '1em'
                           }}
                         >
-                          {optionLabel}) {option.text}
+                          <span style={{ color: '#DBABA0' }}>{optionLabel})</span>{' '}{option.text}
                         </span>
                       </button>
                     </motion.div>
