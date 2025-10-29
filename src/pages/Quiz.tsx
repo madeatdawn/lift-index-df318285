@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 
 const Quiz = () => {
   const navigate = useNavigate();
@@ -115,23 +116,13 @@ const Quiz = () => {
 
   return (
     <div className="page-container">
-      <div className="content-container space-y-6">
+      <div className="content-container space-y-6 relative">
         <div className="quiz-progress-section">
           <div className="flex justify-between items-center text-sm text-muted-foreground">
             <span>Question {currentQuestionIndex + 1} of {quizData.questions.length}</span>
             <span>{Math.round(progress)}% Complete</span>
           </div>
           <Progress value={progress} className="h-2" />
-          {currentQuestionIndex > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handlePrevious}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              ← Previous Question
-            </Button>
-          )}
         </div>
 
         <AnimatePresence mode="wait">
@@ -170,6 +161,18 @@ const Quiz = () => {
             </Card>
           </motion.div>
         </AnimatePresence>
+
+        {currentQuestionIndex > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handlePrevious}
+            className="absolute bottom-0 left-0 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Previous Question
+          </Button>
+        )}
       </div>
     </div>
   );

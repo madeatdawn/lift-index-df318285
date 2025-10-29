@@ -43,6 +43,8 @@ const Results = () => {
             className="mt-[40px] text-[50px] leading-tight"
             style={{ 
               fontFamily: "'Editors Note', serif",
+              fontStyle: 'italic',
+              fontWeight: 200,
               color: '#DBABA0'
             }}
           >

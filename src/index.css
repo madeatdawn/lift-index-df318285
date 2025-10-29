@@ -165,6 +165,7 @@ body, * {
 .text-transparent {
     font-family: 'Editors Note';
     font-weight: 200;
+    font-style: italic;
 }
 .font-semibold {
     font-family: 'Body' !important;
