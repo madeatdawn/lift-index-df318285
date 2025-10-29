@@ -40,7 +40,7 @@ const Results = () => {
               color: '#DBABA0'
             }}
           >
-            Loading your results...
+            Calculating your results...
           </p>
         </div>
       </div>
