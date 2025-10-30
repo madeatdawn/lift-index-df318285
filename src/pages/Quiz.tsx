@@ -282,7 +282,7 @@ const Quiz = () => {
               </div>
 
               {/* Percentage progress - mobile only (below options) */}
-              <div className="text-center text-foreground md:hidden pt-4" style={{ fontSize: '16px' }}>
+              <div className="text-center text-foreground md:hidden pt-4" style={{ fontSize: '20px' }}>
                 {Math.round(displayedProgress)}%
               </div>
             </motion.div>
