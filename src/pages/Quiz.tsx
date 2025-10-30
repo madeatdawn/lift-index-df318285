@@ -280,13 +280,18 @@ const Quiz = () => {
                   );
                 })}
               </div>
+
+              {/* Percentage progress - mobile only (below options) */}
+              <div className="text-center text-foreground md:hidden pt-4" style={{ fontSize: '13px' }}>
+                {Math.round(displayedProgress)}%
+              </div>
             </motion.div>
           </AnimatePresence>
         </div>
       </div>
 
-      {/* Percentage progress - bottom right */}
-      <div className="absolute bottom-8 right-8 text-foreground z-10" style={{ fontSize: '13px' }}>
+      {/* Percentage progress - desktop only (bottom right) */}
+      <div className="hidden md:block absolute bottom-8 right-8 text-foreground z-10" style={{ fontSize: '13px' }}>
         {Math.round(displayedProgress)}%
       </div>
     </div>
