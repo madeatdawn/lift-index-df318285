@@ -172,12 +172,12 @@ body, * {
     font-weight: 400;
     font-size: 13px;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.05em;
     border-radius: 10000px;
 }
 span.text-foreground, .font-medium {
     font-family: 'Body' !important;
-    letter-spacing: 0.03em;
+    letter-spacing: 0em;
     font-weight: 400;
 }
 .font-bold {
