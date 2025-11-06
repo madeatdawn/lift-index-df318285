@@ -12,15 +12,15 @@
 
 @font-face {
   font-family: 'EditorsNote-Extralight';
-  src: url('/fonts/EditorsNote-Extralight.otf') format('opentype');
-  font-weight: 200;
+  src: url('/fonts/EditorsNote-Light.otf') format('opentype');
+  font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Editors Note';
-  src: url('/fonts/EditorsNote-ExtralightItalic.woff') format('woff');
-  font-weight: 200;
+  src: url('/fonts/EditorsNote-LightItalic.woff') format('woff');
+  font-weight: 300;
   font-style: italic;
   font-display: swap;
 }
