@@ -4,8 +4,8 @@
 
 @font-face {
   font-family: 'Conso Serif';
-  src: url('/fonts/ConsoSerif-ExtraLight.otf') format('opentype');
-  font-weight: 200;
+  src: url('/fonts/ConsoSerif-Light.otf') format('opentype');
+  font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
