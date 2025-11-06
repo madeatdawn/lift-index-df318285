@@ -177,7 +177,7 @@ body, * {
 }
 span.text-foreground, .font-medium {
     font-family: 'Body' !important;
-    letter-spacing: 0em;
+    letter-spacing: -0.01em;
     font-weight: 400;
 }
 .font-bold {
