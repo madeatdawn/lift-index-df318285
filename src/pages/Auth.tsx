@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Lock, Mail, ArrowLeft, KeyRound } from "lucide-react";
+import { Lock, Mail, ArrowLeft, KeyRound, Loader2 } from "lucide-react";
 import { z } from "zod";
 
 const emailSchema = z.string().email("Please enter a valid email address");
@@ -18,17 +18,39 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [mode, setMode] = useState<AuthMode>("signin");
 
-  // Check if this is a password reset callback
+  // Handle auth state changes and recovery flow
   useEffect(() => {
-    const type = searchParams.get("type");
-    if (type === "recovery") {
-      setMode("reset");
-    }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "PASSWORD_RECOVERY") {
+          setMode("reset");
+          setIsCheckingSession(false);
+        } else if (event === "SIGNED_IN" && searchParams.get("type") === "recovery") {
+          // Already signed in via recovery link
+          setMode("reset");
+          setIsCheckingSession(false);
+        } else {
+          setIsCheckingSession(false);
+        }
+      }
+    );
+
+    // Check for existing session and recovery type
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const type = searchParams.get("type");
+      if (type === "recovery" && session) {
+        setMode("reset");
+      }
+      setIsCheckingSession(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, [searchParams]);
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -130,6 +152,15 @@ const Auth = () => {
     setPassword("");
     setConfirmPassword("");
   };
+
+  // Show loading while checking session
+  if (isCheckingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "var(--gradient-subtle)" }}>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const renderContent = () => {
     if (mode === "reset") {
