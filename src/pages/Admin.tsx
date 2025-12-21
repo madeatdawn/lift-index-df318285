@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
 import { AdminPasswordGate } from "@/components/AdminPasswordGate";
+import { QuizQuestion } from "@/types/quiz";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -48,6 +49,39 @@ const Admin = () => {
     setEditedData(newData);
   };
 
+  const addQuestion = () => {
+    const newQuestionId = `q${editedData.questions.length + 1}_${Date.now()}`;
+    const newQuestion: QuizQuestion = {
+      id: newQuestionId,
+      question: "New question - edit this text",
+      options: [
+        { id: "a", text: "Option A - edit this text", value: 1 },
+        { id: "b", text: "Option B - edit this text", value: 2 },
+        { id: "c", text: "Option C - edit this text", value: 3 },
+        { id: "d", text: "Option D - edit this text", value: 4 },
+        { id: "e", text: "Option E - edit this text", value: 5 },
+      ],
+    };
+    setEditedData({
+      ...editedData,
+      questions: [...editedData.questions, newQuestion],
+    });
+    toast.info("New question added. Don't forget to save!");
+  };
+
+  const removeQuestion = (questionIndex: number) => {
+    if (editedData.questions.length <= 1) {
+      toast.error("You must have at least one question.");
+      return;
+    }
+    const newQuestions = editedData.questions.filter((_, i) => i !== questionIndex);
+    setEditedData({
+      ...editedData,
+      questions: newQuestions,
+    });
+    toast.info("Question removed. Don't forget to save!");
+  };
+
   return (
     <AdminPasswordGate>
       <div className="min-h-screen p-6" style={{ background: "var(--gradient-subtle)" }}>
@@ -69,27 +103,44 @@ const Admin = () => {
 
         <Tabs defaultValue="questions" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="questions">Questions</TabsTrigger>
+            <TabsTrigger value="questions">Questions ({editedData.questions.length})</TabsTrigger>
             <TabsTrigger value="results">Results</TabsTrigger>
           </TabsList>
 
           <TabsContent value="questions" className="space-y-6">
+            <div className="flex justify-end">
+              <Button onClick={addQuestion} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Question
+              </Button>
+            </div>
+            
             {editedData.questions.map((question, qIndex) => (
               <Card key={question.id} className="p-6" style={{ background: "var(--gradient-card)" }}>
                 <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                      Question {qIndex + 1}
-                    </label>
-                    <Textarea
-                      value={question.question}
-                      onChange={(e) => updateQuestion(qIndex, "question", e.target.value)}
-                      className="min-h-[80px]"
-                    />
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                        Question {qIndex + 1}
+                      </label>
+                      <Textarea
+                        value={question.question}
+                        onChange={(e) => updateQuestion(qIndex, "question", e.target.value)}
+                        className="min-h-[80px]"
+                      />
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => removeQuestion(qIndex)}
+                      className="mt-6"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
 
                   <div className="space-y-3">
-                    <label className="text-sm font-medium text-muted-foreground">Options</label>
+                    <label className="text-sm font-medium text-muted-foreground">Options (ABCDE scoring: 1-5)</label>
                     {question.options.map((option, oIndex) => (
                       <div key={option.id} className="flex gap-2 items-start">
                         <span className="mt-3 text-sm font-medium text-primary">
@@ -112,6 +163,13 @@ const Admin = () => {
                 </div>
               </Card>
             ))}
+
+            <div className="flex justify-center pt-4">
+              <Button onClick={addQuestion} variant="outline" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Another Question
+              </Button>
+            </div>
           </TabsContent>
 
           <TabsContent value="results" className="space-y-6">
