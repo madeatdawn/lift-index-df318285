@@ -10,15 +10,29 @@ import elanourIcon from "@/assets/elanoura-icon.svg";
 
 const Quiz = () => {
   const navigate = useNavigate();
-  const { quizData, addAnswer, removeLastAnswer, resetAnswers, userAnswers } = useQuiz();
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(() => {
-    // Resume from saved progress
-    return userAnswers.length > 0 ? userAnswers.length : 0;
-  });
-  const [started, setStarted] = useState(userAnswers.length > 0);
+  const { quizData, addAnswer, removeLastAnswer, resetAnswers, userAnswers, isLoading } = useQuiz();
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [started, setStarted] = useState(false);
   const [isAnswering, setIsAnswering] = useState(false);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [displayedProgress, setDisplayedProgress] = useState(0);
+
+  // Initialize state once quiz data is loaded
+  useEffect(() => {
+    if (!isLoading && quizData.questions.length > 0) {
+      // Validate saved answers against current questions
+      const validAnswerCount = Math.min(userAnswers.length, quizData.questions.length);
+      if (validAnswerCount > 0 && validAnswerCount < quizData.questions.length) {
+        setCurrentQuestionIndex(validAnswerCount);
+        setStarted(true);
+      } else if (validAnswerCount >= quizData.questions.length) {
+        // User already completed the quiz, reset
+        resetAnswers();
+        setCurrentQuestionIndex(0);
+        setStarted(false);
+      }
+    }
+  }, [isLoading, quizData.questions.length]);
 
   // Keyboard support for selecting answers
   useEffect(() => {
@@ -66,8 +80,8 @@ const Quiz = () => {
     return () => clearInterval(interval);
   }, [userAnswers.length, quizData.questions.length]);
 
-  // Safety checks for quiz data
-  if (!quizData || !quizData.questions || quizData.questions.length === 0) {
+  // Show loading state while fetching quiz data
+  if (isLoading || !quizData || !quizData.questions || quizData.questions.length === 0) {
     return (
       <div className="page-container">
         <Card className="p-8 text-center">
@@ -79,12 +93,21 @@ const Quiz = () => {
 
   const currentQuestion = quizData.questions[currentQuestionIndex];
   
-  // Additional safety check for current question
+  // If currentQuestionIndex is out of bounds, reset to start
+  useEffect(() => {
+    if (!currentQuestion && quizData.questions.length > 0) {
+      resetAnswers();
+      setCurrentQuestionIndex(0);
+      setStarted(false);
+    }
+  }, [currentQuestion, quizData.questions.length]);
+
+  // Show loading while resetting
   if (!currentQuestion) {
     return (
       <div className="page-container">
         <Card className="p-8 text-center">
-          <p className="text-muted-foreground">Quiz data error. Please refresh the page.</p>
+          <p className="text-muted-foreground">Loading quiz...</p>
         </Card>
       </div>
     );
