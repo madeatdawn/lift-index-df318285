@@ -156,11 +156,14 @@ const Quiz = () => {
                 className="text-5xl mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
                 style={{ fontFamily: 'EditorsNote-Extralight, sans-serif', fontStyle: 'normal', fontWeight: 200 }}
               >
-                LIFT Index Quiz
+                The LIFT Index Assessment
               </h1>
               <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-                Discover where you are on your journey and unlock personalized insights 
-                to help you reach your next level of growth and impact.
+                Purpose doesn’t move in straight lines. Neither do we.
+                <br>This assessment reflects how you are currently operating, not your potential or worth. The levels are not a ladder with an endpoint. They are states of capacity that shift as your life, energy, and responsibilities change. Many women move through the same levels multiple times across a lifetime, especially when entering a new season, idea, or calling.
+                </br>
+                <br>This quiz reflects a moment in time, not your full story. Choose what resonates now, trusting that every level is part of becoming.
+                </br>
               </p>
               <Button
                 size="lg"
