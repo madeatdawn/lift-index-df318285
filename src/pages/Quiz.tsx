@@ -34,6 +34,16 @@ const Quiz = () => {
     }
   }, [isLoading, quizData.questions.length]);
 
+  // If currentQuestionIndex is out of bounds, reset to start
+  useEffect(() => {
+    const currentQuestion = quizData.questions[currentQuestionIndex];
+    if (!currentQuestion && quizData.questions.length > 0 && !isLoading) {
+      resetAnswers();
+      setCurrentQuestionIndex(0);
+      setStarted(false);
+    }
+  }, [currentQuestionIndex, quizData.questions.length, isLoading]);
+
   // Keyboard support for selecting answers
   useEffect(() => {
     if (!started || isAnswering || !currentQuestion) return;
@@ -93,15 +103,6 @@ const Quiz = () => {
 
   const currentQuestion = quizData.questions[currentQuestionIndex];
   
-  // If currentQuestionIndex is out of bounds, reset to start
-  useEffect(() => {
-    if (!currentQuestion && quizData.questions.length > 0) {
-      resetAnswers();
-      setCurrentQuestionIndex(0);
-      setStarted(false);
-    }
-  }, [currentQuestion, quizData.questions.length]);
-
   // Show loading while resetting
   if (!currentQuestion) {
     return (
