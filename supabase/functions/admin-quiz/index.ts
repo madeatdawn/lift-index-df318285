@@ -37,36 +37,39 @@ serve(async (req) => {
         resultsCount: quizData.results?.length 
       });
 
-      // Delete existing data using service role
+      // Delete existing data using service role - use gte on sort_order to match all rows
       const { error: deleteOptionsError } = await supabaseAdmin
         .from("quiz_options")
         .delete()
-        .neq("id", "00000000-0000-0000-0000-000000000000");
+        .gte("sort_order", 0);
       
       if (deleteOptionsError) {
         console.error("Error deleting options:", deleteOptionsError);
         throw deleteOptionsError;
       }
+      console.log("Deleted all options");
 
       const { error: deleteQuestionsError } = await supabaseAdmin
         .from("quiz_questions")
         .delete()
-        .neq("id", "00000000-0000-0000-0000-000000000000");
+        .gte("sort_order", 0);
       
       if (deleteQuestionsError) {
         console.error("Error deleting questions:", deleteQuestionsError);
         throw deleteQuestionsError;
       }
+      console.log("Deleted all questions");
 
       const { error: deleteResultsError } = await supabaseAdmin
         .from("quiz_results")
         .delete()
-        .neq("id", "00000000-0000-0000-0000-000000000000");
+        .gte("sort_order", 0);
       
       if (deleteResultsError) {
         console.error("Error deleting results:", deleteResultsError);
         throw deleteResultsError;
       }
+      console.log("Deleted all results");
 
       // Insert questions
       const questionsToInsert = quizData.questions.map((q: any, index: number) => ({
