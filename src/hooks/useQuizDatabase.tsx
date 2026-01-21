@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { QuizData, QuizQuestion, QuizOption, ResultLevel } from "@/types/quiz";
 
@@ -73,58 +73,17 @@ export const useQuizDatabase = () => {
       setLoading(true);
       setError(null);
 
-      // Delete existing data
-      await supabase.from("quiz_options").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-      await supabase.from("quiz_questions").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-      await supabase.from("quiz_results").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      // Use edge function for admin operations (bypasses RLS with service role)
+      const { data, error: fnError } = await supabase.functions.invoke('admin-quiz', {
+        body: {
+          action: 'save',
+          quizData,
+          adminPassword: 'elanoura2025',
+        },
+      });
 
-      // Insert questions
-      const questionsToInsert = quizData.questions.map((q, index) => ({
-        question_id: q.id,
-        question: q.question,
-        sort_order: index,
-      }));
-
-      const { error: questionsError } = await supabase
-        .from("quiz_questions")
-        .insert(questionsToInsert);
-
-      if (questionsError) throw questionsError;
-
-      // Insert options
-      const optionsToInsert = quizData.questions.flatMap((q, qIndex) =>
-        q.options.map((opt, oIndex) => ({
-          question_id: q.id,
-          option_id: opt.id,
-          text: opt.text,
-          value: opt.value,
-          sort_order: oIndex,
-        }))
-      );
-
-      const { error: optionsError } = await supabase
-        .from("quiz_options")
-        .insert(optionsToInsert);
-
-      if (optionsError) throw optionsError;
-
-      // Insert results
-      const resultsToInsert = quizData.results.map((r, index) => ({
-        result_id: r.id,
-        name: r.name,
-        min_score: r.minScore,
-        max_score: r.maxScore,
-        description: r.description,
-        embed_html: r.embedHTML,
-        redirect_url: r.redirectUrl,
-        sort_order: index,
-      }));
-
-      const { error: resultsError } = await supabase
-        .from("quiz_results")
-        .insert(resultsToInsert);
-
-      if (resultsError) throw resultsError;
+      if (fnError) throw fnError;
+      if (data?.error) throw new Error(data.error);
 
       return true;
     } catch (err) {
