@@ -31,6 +31,13 @@
   font-style: normal;
   font-display: swap;
 }
+@font-face {
+  font-family: 'Neue Haas Grotesk 65';
+  src: url('/fonts/65.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
