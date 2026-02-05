@@ -76,10 +76,46 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('quizAnswers');
   };
 
-  const calculateScore = () => {
-    if (userAnswers.length === 0) return 0;
-    const total = userAnswers.reduce((sum, answer) => sum + answer.value, 0);
-    return total / userAnswers.length;
+  const calculateScore = (): number => {
+    // Extract valid answer values (1-5 only)
+    const values = userAnswers
+      .map(a => a?.value)
+      .filter((v): v is number => typeof v === 'number' && v >= 1 && v <= 5);
+
+    if (values.length === 0) return 0;
+
+    // Count frequencies for each level (1-5)
+    const freq: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    values.forEach(v => { freq[v]++; });
+
+    const counts = Object.values(freq);
+    const maxFreq = Math.max(...counts);
+
+    // Find second highest frequency
+    const sortedCounts = [...counts].sort((a, b) => b - a);
+    const secondMax = sortedCounts[1] ?? 0;
+
+    // Find modes (values with max frequency)
+    const modes = Object.entries(freq)
+      .filter(([_, count]) => count === maxFreq)
+      .map(([val]) => Number(val));
+
+    // Calculate median
+    const sorted = [...values].sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)];
+
+    // Clear-lead threshold scales with quiz length (~34% of answers)
+    const n = values.length;
+    const minDominance = Math.max(3, Math.ceil(n * 0.34));
+    const isClearLead = modes.length === 1 && maxFreq >= minDominance && maxFreq > secondMax;
+
+    if (isClearLead) return modes[0];
+
+    // Tie / no clear lead - use median if it's one of the modes
+    if (modes.includes(median)) return median;
+
+    // Support-first fallback: use lowest mode
+    return Math.min(...modes);
   };
 
   return (
