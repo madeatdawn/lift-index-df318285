@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { useQuiz } from "@/contexts/QuizContext";
 import elanourIcon from "@/assets/elanoura-icon.svg";
 
+// Direct mapping from score to level ID
+const LEVEL_MAP: Record<number, string> = {
+  1: 'seeking',
+  2: 'striving',
+  3: 'steadfast',
+  4: 'shining',
+  5: 'significance'
+};
+
 const Results = () => {
   const navigate = useNavigate();
   const { quizData, calculateScore, userAnswers, resetAnswers } = useQuiz();
@@ -10,17 +19,24 @@ const Results = () => {
 
   useLayoutEffect(() => {
     const score = calculateScore();
-    const matchedResult = quizData.results.find(
-      r => score >= r.minScore && score <= r.maxScore
-    );
+    
+    // Handle edge case: incomplete quiz or error
+    if (score === 0 || userAnswers.length === 0) {
+      navigate('/quiz');
+      return;
+    }
 
-    if (matchedResult?.redirectUrl && userAnswers.length > 0) {
+    // Direct ID mapping instead of score ranges
+    const levelId = LEVEL_MAP[score];
+    const matchedResult = quizData.results.find(r => r.id === levelId);
+
+    if (matchedResult?.redirectUrl) {
       setIsRedirecting(true);
       // Clear saved progress and redirect
       resetAnswers();
       window.location.href = matchedResult.redirectUrl;
     }
-  }, [userAnswers, quizData.results, calculateScore, resetAnswers]);
+  }, [userAnswers, quizData.results, calculateScore, resetAnswers, navigate]);
 
   if (isRedirecting) {
     return (
