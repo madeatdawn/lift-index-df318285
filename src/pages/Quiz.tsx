@@ -8,14 +8,24 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import elanourIcon from "@/assets/elanoura-icon.svg";
 
+// Direct mapping from score to level ID
+const LEVEL_MAP: Record<number, string> = {
+  1: 'seeking',
+  2: 'striving',
+  3: 'steadfast',
+  4: 'shining',
+  5: 'significance'
+};
+
 const Quiz = () => {
   const navigate = useNavigate();
-  const { quizData, addAnswer, removeLastAnswer, resetAnswers, userAnswers, isLoading } = useQuiz();
+  const { quizData, addAnswer, removeLastAnswer, resetAnswers, userAnswers, isLoading, calculateScore } = useQuiz();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [started, setStarted] = useState(false);
   const [isAnswering, setIsAnswering] = useState(false);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [displayedProgress, setDisplayedProgress] = useState(0);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Initialize state once quiz data is loaded
   useEffect(() => {
@@ -90,6 +100,27 @@ const Quiz = () => {
     return () => clearInterval(interval);
   }, [userAnswers.length, quizData.questions.length]);
 
+  // Handle quiz completion - calculate score and redirect directly
+  const handleQuizComplete = () => {
+    setIsRedirecting(true);
+    
+    // Small delay to show the loading state
+    setTimeout(() => {
+      const score = calculateScore();
+      const levelId = LEVEL_MAP[score];
+      const result = quizData.results.find(r => r.id === levelId);
+      
+      if (result?.redirectUrl && result.redirectUrl.startsWith('https://')) {
+        resetAnswers();
+        window.location.href = result.redirectUrl;
+      } else {
+        // Fallback to main site
+        resetAnswers();
+        window.location.href = 'https://elanoura.com';
+      }
+    }, 100);
+  };
+
   // Show loading state while fetching quiz data
   if (isLoading || !quizData || !quizData.questions || quizData.questions.length === 0) {
     return (
@@ -97,6 +128,32 @@ const Quiz = () => {
         <Card className="p-8 text-center">
           <p className="text-muted-foreground">Loading quiz data...</p>
         </Card>
+      </div>
+    );
+  }
+
+  // Show redirecting state
+  if (isRedirecting) {
+    return (
+      <div className="page-container">
+        <div className="results-loading-container">
+          <img 
+            src={elanourIcon} 
+            alt="Élanoura" 
+            className="w-[70px] h-auto"
+          />
+          <p 
+            className="mt-[40px] text-[50px] leading-tight text-center"
+            style={{ 
+              fontFamily: "'Editors Note', serif",
+              fontStyle: 'italic',
+              fontWeight: 200,
+              color: '#DBABA0'
+            }}
+          >
+            Calculating your results...
+          </p>
+        </div>
       </div>
     );
   }
@@ -138,8 +195,8 @@ const Quiz = () => {
         setCurrentQuestionIndex(prev => prev + 1);
         setIsAnswering(false);
       } else {
-        // Navigate to results - don't set isAnswering to false so we stay in loading state
-        navigate("/results", { replace: true });
+        // Quiz complete - calculate score and redirect directly
+        handleQuizComplete();
       }
     }, 400);
   };
