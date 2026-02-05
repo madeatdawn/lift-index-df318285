@@ -121,17 +121,6 @@ const Quiz = () => {
     }, 100);
   };
 
-  // Show loading state while fetching quiz data
-  if (isLoading || !quizData || !quizData.questions || quizData.questions.length === 0) {
-    return (
-      <div className="page-container">
-        <Card className="p-8 text-center">
-          <p className="text-muted-foreground">Loading quiz data...</p>
-        </Card>
-      </div>
-    );
-  }
-
   // Show redirecting state
   if (isRedirecting) {
     return (
