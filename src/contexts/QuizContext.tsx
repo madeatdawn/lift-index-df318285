@@ -24,7 +24,7 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
     const saved = localStorage.getItem('quizAnswers');
     return saved ? JSON.parse(saved) : [];
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const { fetchQuizData, saveQuizData } = useQuizDatabase();
 
   useEffect(() => {
@@ -37,19 +37,12 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
   }, [userAnswers]);
 
   const loadQuizData = async () => {
-    setIsLoading(true);
     const data = await fetchQuizData();
     
     if (data && data.questions.length > 0) {
-      // Use data from database
       setQuizData(data);
-    } else {
-      // No data in database, use initial data and save it
-      setQuizData(initialQuizData);
-      await saveQuizData(initialQuizData);
     }
-    
-    setIsLoading(false);
+    // If no database data, keep using initialQuizData (already set)
   };
 
   const updateQuizData = async (data: QuizData) => {
