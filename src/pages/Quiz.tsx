@@ -259,14 +259,14 @@ const Quiz = () => {
                 <p className="mb-6">Answer the following nine questions based on:</p>
                 
                 <p className="mb-6">
-                  <span style={{ fontFamily: "'Neue Haas Grotesk 65', sans-serif", fontWeight: 500 }}>What is consistently true right now</span> vs. what you may aspire to or hope for. This assessment reflects how you are currently operating, not your potential or worth.
+                  <span style={{ fontFamily: "'Neue Haas Grotesk 65', sans-serif", fontWeight: 500 }}>What is consistently true right now…</span> This assessment reflects how you are currently operating, not what you may aspire to or hope for. 
                 </p>
                 
                 <p className="mb-6">
-                  <span style={{ fontFamily: "'Neue Haas Grotesk 65', sans-serif", fontWeight: 500 }}>The chapter or initiative you are focused on now</span>, even if you are already successful in other areas of your life or work. Many women move up and down through the levels multiple times, especially when entering a new season, idea, calling, or life circumstance. This provides an opportunity to do so with grace, clarity, and agency.
+                  <span style={{ fontFamily: "'Neue Haas Grotesk 65', sans-serif", fontWeight: 500 }}>The chapter or initiative you are focused on now…</span> Even if you are already successful in other areas of your life or work. Many women move up and down through the levels multiple times.
                 </p>
                 
-                <p className="mb-4">Your results will guide you to a dedicated page for your current level, with insights, resources, and exercises designed to support what you're navigating now.</p>
+                <p className="mb-4">Your results will guide you to a level page with insights, resources, and exercises designed to support what you're navigating now. **Keep in mind you might be between levels, so do check the levels before and after to see which aligns with you most.</p>
                 
                 <p>Thank you for being here!</p>
               </div>
