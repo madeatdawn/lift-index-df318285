@@ -122,9 +122,14 @@ const applyTieBreaker = (
   // Separate Seeking (fallback) from real contenders
   const nonSeekingQualifiers = qualifyingCandidates.filter((s) => s > 1);
 
-  // If no non-Seeking stages qualify, return Seeking
+  // If no non-Seeking stages qualify, return lowest stage with answers
   if (nonSeekingQualifiers.length === 0) {
-    return 1;
+    for (let stage = 1; stage <= 5; stage++) {
+      if (counts[stage] > 0) {
+        return stage;
+      }
+    }
+    return 1; // Ultimate fallback if somehow no answers
   }
 
   // If exactly one non-Seeking stage qualifies, return it
@@ -156,6 +161,14 @@ const validateAndDowngrade = (
   counts: Record<number, number>,
   answers: AnswerEntry[]
 ): number => {
+  // Helper: find lowest stage with at least one answer
+  const findLowestWithAnswers = (): number => {
+    for (let s = 1; s <= 5; s++) {
+      if (counts[s] > 0) return s;
+    }
+    return 1; // Ultimate fallback
+  };
+
   // Stage 5: Significance
   if (stage === 5) {
     if (counts[5] < 3) {
@@ -193,13 +206,21 @@ const validateAndDowngrade = (
   // Stage 2: Striving
   if (stage === 2) {
     if (counts[2] < 3) {
-      return 1; // Downgrade to Seeking
+      // Only fall to Seeking if there are Seeking answers
+      if (counts[1] > 0) {
+        return 1;
+      }
+      // Otherwise return lowest stage with answers
+      return findLowestWithAnswers();
     }
     return 2;
   }
 
-  // Stage 1: Seeking - no minimum required
-  return 1;
+  // Stage 1: Seeking - return if it has answers, otherwise find lowest with answers
+  if (counts[1] > 0) {
+    return 1;
+  }
+  return findLowestWithAnswers();
 };
 
 /**
