@@ -249,9 +249,9 @@ export const calculateLiftScore = (userAnswers: UserAnswer[]): number => {
   const answers: AnswerEntry[] = userAnswers
     .map((a) => ({
       questionId: a.questionId,
-      value: a.value,
+      value: Number(a.value),  // Ensure numeric type
     }))
-    .filter((a) => a.value >= 1 && a.value <= 5);
+    .filter((a) => !isNaN(a.value) && a.value >= 1 && a.value <= 5);
 
   if (answers.length === 0) {
     return 1; // Default to Seeking if no valid answers
