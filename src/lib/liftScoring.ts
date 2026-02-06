@@ -114,30 +114,37 @@ const applyTieBreaker = (
   answers: AnswerEntry[],
   counts: Record<number, number>
 ): number => {
-  // Primary: Q3 (Where progress lives)
+  // Find candidates that meet their thresholds
+  const qualifyingCandidates = candidates.filter((stage) =>
+    meetsThreshold(stage, counts, answers)
+  );
+
+  // Separate Seeking (fallback) from real contenders
+  const nonSeekingQualifiers = qualifyingCandidates.filter((s) => s > 1);
+
+  // If no non-Seeking stages qualify, return Seeking
+  if (nonSeekingQualifiers.length === 0) {
+    return 1;
+  }
+
+  // If exactly one non-Seeking stage qualifies, return it
+  if (nonSeekingQualifiers.length === 1) {
+    return nonSeekingQualifiers[0];
+  }
+
+  // Multiple non-Seeking stages qualify - use Q3/Q5 among them only
   const q3Value = getAnswerForQuestion(answers, "q3");
-  if (q3Value !== undefined && candidates.includes(q3Value)) {
+  if (q3Value !== undefined && nonSeekingQualifiers.includes(q3Value)) {
     return q3Value;
   }
 
-  // Secondary: Q5 (Limits on growth)
   const q5Value = getAnswerForQuestion(answers, "q5");
-  if (q5Value !== undefined && candidates.includes(q5Value)) {
+  if (q5Value !== undefined && nonSeekingQualifiers.includes(q5Value)) {
     return q5Value;
   }
 
-  // Check candidates from highest to lowest
-  // Return highest that meets thresholds
-  const sortedCandidates = [...candidates].sort((a, b) => b - a);
-
-  for (const stage of sortedCandidates) {
-    if (meetsThreshold(stage, counts, answers)) {
-      return stage;
-    }
-  }
-
-  // Default: lowest stage
-  return Math.min(...candidates);
+  // Return highest qualifying non-Seeking candidate
+  return Math.max(...nonSeekingQualifiers);
 };
 
 /**
