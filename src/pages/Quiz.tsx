@@ -109,6 +109,16 @@ const Quiz = () => {
     // Small delay to show the loading state
     setTimeout(() => {
       const score = calculateLiftScore(answersSnapshot);
+
+      // Edge case: no valid answers
+      if (score === 0) {
+        setIsRedirecting(false);
+        resetAnswers();
+        setCurrentQuestionIndex(0);
+        setStarted(false);
+        return;
+      }
+
       const levelId = LEVEL_MAP[score];
       const result = quizData.results.find((r) => r.id === levelId);
 
