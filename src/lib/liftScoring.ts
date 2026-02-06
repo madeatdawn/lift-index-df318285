@@ -81,14 +81,38 @@ const meetsSignificanceDomains = (answers: AnswerEntry[]): boolean => {
 };
 
 /**
+ * Check if a stage meets its minimum thresholds (without recursion)
+ */
+const meetsThreshold = (
+  stage: number,
+  counts: Record<number, number>,
+  answers: AnswerEntry[]
+): boolean => {
+  switch (stage) {
+    case 5:
+      return counts[5] >= 3 && meetsSignificanceDomains(answers);
+    case 4:
+      return counts[4] >= 3 && meetsShiningDomains(answers);
+    case 3:
+      return counts[3] >= 3 && counts[1] <= 2;
+    case 2:
+      return counts[2] >= 3;
+    default:
+      return true; // Seeking always qualifies
+  }
+};
+
+/**
  * Apply tie-breaking rules when multiple stages have equal counts
  * 1. Use Q3 (Where progress lives) as primary tie-breaker
  * 2. Use Q5 (Limits on growth) as secondary tie-breaker
- * 3. Default to lower stage (ground down, not up)
+ * 3. Check candidates from highest to lowest, return first that meets thresholds
+ * 4. Default to lower stage (ground down, not up)
  */
 const applyTieBreaker = (
   candidates: number[],
-  answers: AnswerEntry[]
+  answers: AnswerEntry[],
+  counts: Record<number, number>
 ): number => {
   // Primary: Q3 (Where progress lives)
   const q3Value = getAnswerForQuestion(answers, "q3");
@@ -102,7 +126,17 @@ const applyTieBreaker = (
     return q5Value;
   }
 
-  // Default: lower stage (ground down, not up)
+  // Check candidates from highest to lowest
+  // Return highest that meets thresholds
+  const sortedCandidates = [...candidates].sort((a, b) => b - a);
+
+  for (const stage of sortedCandidates) {
+    if (meetsThreshold(stage, counts, answers)) {
+      return stage;
+    }
+  }
+
+  // Default: lowest stage
   return Math.min(...candidates);
 };
 
@@ -191,7 +225,7 @@ export const calculateLiftScore = (userAnswers: UserAnswer[]): number => {
   // Determine provisional stage
   let provisional: number;
   if (candidates.length > 1) {
-    provisional = applyTieBreaker(candidates, answers);
+    provisional = applyTieBreaker(candidates, answers, counts);
   } else {
     provisional = candidates[0];
   }
