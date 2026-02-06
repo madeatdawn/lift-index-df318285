@@ -228,15 +228,28 @@ const Quiz = () => {
               >
                 The LIFT Index Assessment
               </h1>
-              <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-                <span style={{ fontFamily: "'Neue Haas Grotesk 65', Body, sans-serif" }}>This quiz is designed to help you understand where you are right now.</span>
-                <br /><br />
-                This assessment reflects how you are currently operating, not your potential or worth. The LIFT levels are not a ladder or an endpoint. They are states of capacity that shift as your life, energy, and responsibilities change. Many women move through the same levels multiple times, especially when entering a new season, idea, or calling.
-                <br /><br />
-                Answer with your current chapter or initiative in mind, even if you are already successful in other areas of your life or work. Your results will guide you to a dedicated page for your current stage, with insights, resources, and exercises designed to support what you're navigating now.
-                <br /><br />
-                This is a meaningful first step toward clarity and intentional progress!
-              </p>
+              <div className="text-xl text-muted-foreground mb-8 leading-relaxed">
+                <p className="mb-6">Answer the following nine questions based on:</p>
+                
+                <ul className="text-left space-y-4 mb-6">
+                  <li className="flex gap-3">
+                    <span className="text-primary mt-1">•</span>
+                    <span>
+                      <span style={{ fontFamily: "'Neue Haas Grotesk 65', sans-serif", fontWeight: 500 }}>What is consistently true right now</span> vs. what you may aspire to or hope for. This assessment reflects how you are currently operating, not your potential or worth.
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-primary mt-1">•</span>
+                    <span>
+                      <span style={{ fontFamily: "'Neue Haas Grotesk 65', sans-serif", fontWeight: 500 }}>The chapter or initiative you are focused on now</span>, even if you are already successful in other areas of your life or work. Many women move up and down through the levels multiple times, especially when entering a new season, idea, calling, or life circumstance. This provides an opportunity to do so with grace, clarity, and agency.
+                    </span>
+                  </li>
+                </ul>
+                
+                <p className="mb-4">Your results will guide you to a dedicated page for your current level, with insights, resources, and exercises designed to support what you're navigating now.</p>
+                
+                <p>Thank you for being here!</p>
+              </div>
               <Button
                 size="lg"
                 onClick={handleStart}
