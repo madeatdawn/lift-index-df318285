@@ -122,14 +122,17 @@ const applyTieBreaker = (
   // Separate Seeking (fallback) from real contenders
   const nonSeekingQualifiers = qualifyingCandidates.filter((s) => s > 1);
 
-  // If no non-Seeking stages qualify, return lowest stage with answers
+  // If no non-Seeking stages qualify, return the mode (stage with most answers)
   if (nonSeekingQualifiers.length === 0) {
+    let maxCount = 0;
+    let modeStage = 1;
     for (let stage = 1; stage <= 5; stage++) {
-      if (counts[stage] > 0) {
-        return stage;
+      if (counts[stage] > maxCount) {
+        maxCount = counts[stage];
+        modeStage = stage;
       }
     }
-    return 1; // Ultimate fallback if somehow no answers
+    return modeStage;
   }
 
   // If exactly one non-Seeking stage qualifies, return it
@@ -167,6 +170,19 @@ const validateAndDowngrade = (
       if (counts[s] > 0) return s;
     }
     return 1; // Ultimate fallback
+  };
+
+  // Helper: find stage with highest count (the mode)
+  const findModeStage = (): number => {
+    let maxCount = 0;
+    let modeStage = 1;
+    for (let s = 1; s <= 5; s++) {
+      if (counts[s] > maxCount) {
+        maxCount = counts[s];
+        modeStage = s;
+      }
+    }
+    return modeStage;
   };
 
   // Stage 5: Significance
@@ -210,17 +226,17 @@ const validateAndDowngrade = (
       if (counts[1] > 0) {
         return 1;
       }
-      // Otherwise return lowest stage with answers
-      return findLowestWithAnswers();
+      // No Seeking answers - return the mode (stage with most answers)
+      return findModeStage();
     }
     return 2;
   }
 
-  // Stage 1: Seeking - return if it has answers, otherwise find lowest with answers
+  // Stage 1: Seeking - return if it has answers, otherwise return the mode
   if (counts[1] > 0) {
     return 1;
   }
-  return findLowestWithAnswers();
+  return findModeStage();
 };
 
 /**
