@@ -1,43 +1,31 @@
 
+# Fix Tie-Breaking: Treat Seeking as Fallback, Not Competitor
 
-# Fix Striving Appearance in Tie-Breaking Logic
+## Problem
 
-## Problem Identified
+Seeking (stage 1) has no minimum threshold - it always "qualifies." This makes it unfairly compete in tie-breaking via Q3/Q5. When Q3=1 (Seeking answer), it wins the tie even when Striving legitimately qualifies.
 
-The current tie-breaking logic defaults to the **lowest** stage when Q3/Q5 don't resolve the tie. However, the LIFT Index rules state:
-
-> "Choose the lower stage, **unless the higher stage meets all its minimum thresholds**."
-
-This means when there's a tie, we should check higher candidates first to see if they qualify before defaulting down.
-
-## Test Case Walkthrough
-
-| Test | Counts | Current | Expected | Fix Needed |
-|------|--------|---------|----------|------------|
-| `[1,1,1,1,2,3,2,2,2]` | 1=4, 2=4 | Seeking | Striving | Striving has 4 answers (meets threshold) - should be allowed |
-| `[1,1,1,2,2,2,3,3,3]` | 1=3, 2=3, 3=3 | Seeking | Striving | Q3 picks Steadfast, but 3 A's blocks it → should cascade to Striving |
-| `[2,2,2,3,3,3,4,4,4]` | 2=3, 3=3, 4=3 | Striving | Steadfast | Q3 picks Steadfast, 0 A's, should pass! |
-
-## Root Cause
-
-The `applyTieBreaker` function picks based on Q3/Q5 values, but doesn't check if the picked stage meets thresholds. When Q3/Q5 aren't in candidates, it defaults to `Math.min()`.
-
-The fix: When there's a tie, we should iterate from highest to lowest candidate and return the first one that passes validation.
+**Example**: `[1,1,1,1,2,3,2,2,2]`
+- Counts: 1=4, 2=4 (tie)
+- Striving has 4 answers (meets threshold of 3)
+- But Q3=1, so current code picks Seeking
+- Should be Striving
 
 ## Solution
 
-Modify the tie-breaking approach:
+Treat Seeking as a **fallback only**, not a tie-breaker participant:
 
-1. Sort tied candidates from **highest to lowest**
-2. For each candidate, check if it meets its thresholds
-3. Return the first one that passes
-4. This naturally "grounds down" when higher stages don't qualify
+1. Find which candidates meet their thresholds
+2. Separate Seeking from non-Seeking qualifiers
+3. If any non-Seeking stages qualify, choose among those
+4. Only use Q3/Q5 tie-breakers among stages 2-5
+5. Seeking is only returned if no other stage qualifies
 
-## Code Changes
+## Code Change
 
 ### File: `src/lib/liftScoring.ts`
 
-**Update `applyTieBreaker` function** to check thresholds when resolving ties:
+Replace the `applyTieBreaker` function (lines 91-117):
 
 ```typescript
 const applyTieBreaker = (
@@ -45,88 +33,63 @@ const applyTieBreaker = (
   answers: AnswerEntry[],
   counts: Record<number, number>
 ): number => {
-  // Primary: Q3 (Where progress lives)
+  // Find candidates that meet their thresholds
+  const qualifyingCandidates = candidates.filter((stage) =>
+    meetsThreshold(stage, counts, answers)
+  );
+
+  // Separate Seeking (fallback) from real contenders
+  const nonSeekingQualifiers = qualifyingCandidates.filter((s) => s > 1);
+
+  // If no non-Seeking stages qualify, return Seeking
+  if (nonSeekingQualifiers.length === 0) {
+    return 1;
+  }
+
+  // If exactly one non-Seeking stage qualifies, return it
+  if (nonSeekingQualifiers.length === 1) {
+    return nonSeekingQualifiers[0];
+  }
+
+  // Multiple non-Seeking stages qualify - use Q3/Q5 among them only
   const q3Value = getAnswerForQuestion(answers, "q3");
-  if (q3Value !== undefined && candidates.includes(q3Value)) {
+  if (q3Value !== undefined && nonSeekingQualifiers.includes(q3Value)) {
     return q3Value;
   }
 
-  // Secondary: Q5 (Limits on growth)
   const q5Value = getAnswerForQuestion(answers, "q5");
-  if (q5Value !== undefined && candidates.includes(q5Value)) {
+  if (q5Value !== undefined && nonSeekingQualifiers.includes(q5Value)) {
     return q5Value;
   }
 
-  // Check candidates from highest to lowest
-  // Return highest that meets thresholds
-  const sortedCandidates = [...candidates].sort((a, b) => b - a);
+  // Return highest qualifying non-Seeking candidate
+  return Math.max(...nonSeekingQualifiers);
+};
+```
+
+## Expected Results
+
+| Test | Counts | Before | After | Why |
+|------|--------|--------|-------|-----|
+| `[1,1,1,1,2,3,2,2,2]` | 1=4, 2=4 | Seeking | **Striving** | Striving qualifies (4>=3), Seeking excluded from competition |
+| `[1,1,1,2,2,2,3,3,3]` | 1=3, 2=3, 3=3 | Seeking | **Striving** | Steadfast blocked (3 A's), Striving qualifies, Seeking excluded |
+| `[2,2,2,3,3,3,4,4,4]` | 2=3, 3=3, 4=3 | Striving | **Steadfast** | Shining fails domains, Striving/Steadfast both qualify, highest wins |
+| `[1,1,1,1,1,2,2,2,2]` | 1=5, 2=4 | Seeking | **Seeking** | Seeking has more answers, wins outright (no tie) |
+
+## Logic Flow
+
+```text
+applyTieBreaker([1, 2], answers, counts):
   
-  for (const stage of sortedCandidates) {
-    if (meetsThreshold(stage, counts, answers)) {
-      return stage;
-    }
-  }
-
-  // Default: lowest stage
-  return Math.min(...candidates);
-};
+  qualifyingCandidates = [1, 2]  // Both meet thresholds
+  nonSeekingQualifiers = [2]     // Filter out Seeking
+  
+  Only one non-Seeking qualifies!
+  → Return 2 (Striving)
 ```
-
-**Add helper function** to check thresholds without recursion:
-
-```typescript
-const meetsThreshold = (
-  stage: number,
-  counts: Record<number, number>,
-  answers: AnswerEntry[]
-): boolean => {
-  switch (stage) {
-    case 5:
-      return counts[5] >= 3 && meetsSignificanceDomains(answers);
-    case 4:
-      return counts[4] >= 3 && meetsShiningDomains(answers);
-    case 3:
-      return counts[3] >= 3 && counts[1] <= 2;
-    case 2:
-      return counts[2] >= 3;
-    default:
-      return true; // Seeking always qualifies
-  }
-};
-```
-
-**Update the main function** to pass `counts` to tie-breaker:
-
-```typescript
-if (candidates.length > 1) {
-  provisional = applyTieBreaker(candidates, answers, counts);
-} else {
-  provisional = candidates[0];
-}
-```
-
-## Expected Results After Fix
-
-| Test | Counts | Before | After |
-|------|--------|--------|-------|
-| `[1,1,1,1,2,3,2,2,2]` | 1=4, 2=4 | Seeking | **Striving** (4 B's meets threshold) |
-| `[1,1,1,2,2,2,3,3,3]` | 1=3, 2=3, 3=3 | Seeking | **Striving** (Steadfast blocked by 3 A's, Striving has 3 B's) |
-| `[1,1,1,3,3,3,3,2,1]` | 1=4, 3=4 | Seeking | **Steadfast** (has 4 C's, but 4 A's blocks → Striving only has 1 → **Seeking**) |
-| `[2,2,2,3,3,3,4,4,4]` | 2=3, 3=3, 4=3 | Striving | **Steadfast** (has 3 C's, 0 A's, passes) |
-
-## Note on Test Case 5
-
-`[1,1,1,3,3,3,3,2,1]` with counts 1=4, 2=1, 3=4:
-- Tie between Seeking (1) and Steadfast (3)
-- Steadfast has 4 C's but also 4 A's → blocked (>2 A's rule)
-- Striving only has 1 B → doesn't meet threshold
-- Falls to Seeking
-
-If you want this to be Striving, we would need to relax the Striving threshold or add a special rule. Currently the rules require 3 B answers for Striving.
 
 ## Files to Modify
 
 | File | Change |
 |------|--------|
-| `src/lib/liftScoring.ts` | Add `meetsThreshold` helper, update `applyTieBreaker` to check thresholds when defaulting |
-
+| `src/lib/liftScoring.ts` | Update `applyTieBreaker` to treat Seeking as fallback only |
