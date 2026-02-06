@@ -112,6 +112,10 @@ const Quiz = () => {
 
       // Edge case: no valid answers
       if (score === 0) {
+        console.info("[LIFT] No valid answers; resetting quiz", {
+          rawValues: answersSnapshot.map((a) => a.value),
+        });
+
         setIsRedirecting(false);
         resetAnswers();
         setCurrentQuestionIndex(0);
@@ -121,6 +125,14 @@ const Quiz = () => {
 
       const levelId = LEVEL_MAP[score];
       const result = quizData.results.find((r) => r.id === levelId);
+
+      console.info("[LIFT] Quiz complete", {
+        rawValues: answersSnapshot.map((a) => a.value),
+        score,
+        levelId,
+        matchedResultId: result?.id,
+        redirectUrl: result?.redirectUrl,
+      });
 
       if (result?.redirectUrl && result.redirectUrl.startsWith("https://")) {
         resetAnswers();
