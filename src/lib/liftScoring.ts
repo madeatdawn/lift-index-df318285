@@ -46,11 +46,7 @@ export const calculateLiftScore = (userAnswers: UserAnswer[]): number => {
       ? Math.round((sorted[mid - 1] + sorted[mid]) / 2)
       : sorted[mid];
 
-  // If median is among the modes, use it (grounded choice)
-  if (modes.includes(median)) {
-    return median;
-  }
-
-  // Fallback: use lowest mode (support-first / ground-down principle)
-  return Math.min(...modes);
+  // No clear lead - use median as the definitive tiebreaker
+  // The median represents the user's statistical center, regardless of modes
+  return median;
 };

@@ -60,12 +60,19 @@ describe("calculateLiftScore", () => {
     expect(calculateLiftScore([])).toBe(0);
   });
 
-  it("returns lowest mode when median not in modes", () => {
-    // Edge case: all answers are 1 and 5 only
+  it("returns Steadfast (3) for bimodal [1,1,5,5] via median", () => {
     const answers = makeAnswers([1, 1, 5, 5]);
     // Counts: {1:2, 5:2}
-    // modes = [1,5], median = (1+5)/2 = 3 (not in modes)
-    // Fallback to lowest mode = 1
-    expect(calculateLiftScore(answers)).toBe(1);
+    // modes = [1,5], median = (1+5)/2 = 3
+    // Use median as tiebreaker, not lowest mode
+    expect(calculateLiftScore(answers)).toBe(3);
+  });
+
+  it("returns Striving (2) for [1,1,1,3,3,3,3,2,1] via median", () => {
+    const answers = makeAnswers([1, 1, 1, 3, 3, 3, 3, 2, 1]);
+    // Counts: {1:4, 2:1, 3:4}
+    // modes = [1,3] (tied at 4), no clear lead
+    // sorted = [1,1,1,1,2,3,3,3,3], median = 2
+    expect(calculateLiftScore(answers)).toBe(2);
   });
 });
