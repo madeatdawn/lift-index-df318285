@@ -228,7 +228,7 @@ const Quiz = () => {
               >
                 The LIFT Index Assessment
               </h1>
-              <div className="text-xl text-muted-foreground mb-8 leading-relaxed text-left">
+              <div className="text-xl text-muted-foreground mb-8 leading-relaxed text-center">
                 <p className="mb-6">Answer the following nine questions based on:</p>
                 
                 <p className="mb-6">
