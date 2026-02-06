@@ -15,112 +15,90 @@ export const initialQuizData: QuizData = {
     },
     {
       id: "q2",
-      question: "What are you struggling with currently?",
+      question: "How consistently are you seeing results from your efforts?",
       options: [
-        { id: "a", text: "Being unsure which advice, mentor, or opportunities to follow.", value: 1 },
-        { id: "b", text: "Overworking, lacking boundaries, or losing focus on priorities.", value: 2 },
-        { id: "c", text: "Feeling the pull to do more, worrying about falling behind, or comparing yourself to others.", value: 3 },
-        { id: "d", text: "Feeling complacent about what you've accomplished and unsure how to evolve meaningfully.", value: 4 },
-        { id: "e", text: "Risk of burnout or over-identifying with your role or legacy.", value: 5 }
+        { id: "a", text: "I'm not sure what results to expect yet—I'm still figuring things out.", value: 1 },
+        { id: "b", text: "Results are inconsistent, but I'm learning from each attempt.", value: 2 },
+        { id: "c", text: "I see steady results that I can rely on, even if they're not extraordinary.", value: 3 },
+        { id: "d", text: "I consistently achieve meaningful results aligned with my strengths.", value: 4 },
+        { id: "e", text: "My results create ripple effects—they impact others beyond just myself.", value: 5 }
       ]
     },
     {
       id: "q3",
-      question: "What motivates you most right now?",
+      question: "Where does progress live for you right now?",
       options: [
-        { id: "a", text: "Understanding what's possible for me, finding mentors, and exploring different paths.", value: 1 },
-        { id: "b", text: "Making consistent progress and seeing tangible results from my efforts.", value: 2 },
-        { id: "c", text: "Strengthening my foundation while exploring ways to grow beyond comfort zones.", value: 3 },
-        { id: "d", text: "Expressing my authentic self and leveraging my strengths for meaningful impact.", value: 4 },
-        { id: "e", text: "Expanding influence, mentoring others, and leaving a lasting mark through my work.", value: 5 }
+        { id: "a", text: "Progress means learning, exploring, and understanding my options.", value: 1 },
+        { id: "b", text: "Progress is about building momentum and taking consistent action.", value: 2 },
+        { id: "c", text: "Progress is maintaining what works while cautiously expanding.", value: 3 },
+        { id: "d", text: "Progress is expressing my authentic expertise and creating impact.", value: 4 },
+        { id: "e", text: "Progress is elevating others and creating lasting systems of impact.", value: 5 }
       ]
     },
     {
       id: "q4",
-      question: "How do you approach new opportunities?",
+      question: "How would you describe your financial relationship to this area of focus?",
       options: [
-        { id: "a", text: "I explore them cautiously, seeking guidance and learning from others before committing.", value: 1 },
-        { id: "b", text: "I try different approaches, learning by doing, and gradually building momentum.", value: 2 },
-        { id: "c", text: "I evaluate opportunities carefully, balancing potential growth with stability.", value: 3 },
-        { id: "d", text: "If it's worth my time, I take bold steps based on my expertise and values, expressing my unique voice confidently.", value: 4 },
-        { id: "e", text: "I select opportunities that amplify impact, mentor others, and leave a lasting legacy.", value: 5 }
+        { id: "a", text: "I'm investing time and energy without expecting financial return yet.", value: 1 },
+        { id: "b", text: "I'm starting to see some income but it's not reliable or substantial.", value: 2 },
+        { id: "c", text: "I have stable income that meets my needs, though I want more.", value: 3 },
+        { id: "d", text: "I'm compensated well for my expertise and value.", value: 4 },
+        { id: "e", text: "Financial success flows naturally and supports broader impact.", value: 5 }
       ]
     },
     {
       id: "q5",
-      question: "How do you handle uncertainty or change?",
+      question: "What limits your growth right now?",
       options: [
-        { id: "a", text: "I seek advice, gather information, and explore before acting.", value: 1 },
-        { id: "b", text: "I experiment, adjust as I go, and learn from trial and error.", value: 2 },
-        { id: "c", text: "I plan carefully to maintain stability while cautiously stepping outside my comfort zone.", value: 3 },
-        { id: "d", text: "I act confidently, trusting my experience and authenticity.", value: 4 },
-        { id: "e", text: "I embrace transformative change that strengthens my impact and benefits others.", value: 5 }
+        { id: "a", text: "Clarity—I don't know which direction to commit to.", value: 1 },
+        { id: "b", text: "Focus—I'm spread too thin or lack systems.", value: 2 },
+        { id: "c", text: "Risk tolerance—I hesitate to step outside what's working.", value: 3 },
+        { id: "d", text: "Capacity—I need to scale or delegate to grow further.", value: 4 },
+        { id: "e", text: "Sustainability—I need to ensure my impact continues without burning out.", value: 5 }
       ]
     },
     {
       id: "q6",
-      question: "How do you think about risk?",
+      question: "How visible is your work to others?",
       options: [
-        { id: "a", text: "I'm cautious but curious, seeking guidance before making moves.", value: 1 },
-        { id: "b", text: "I take small calculated risks to test and learn.", value: 2 },
-        { id: "c", text: "I prefer measured steps that protect my stability while allowing growth.", value: 3 },
-        { id: "d", text: "I step confidently into opportunities that reflect my authentic self. Otherwise, I can pass.", value: 4 },
-        { id: "e", text: "I embrace transformative risks that amplify impact for myself and others.", value: 5 }
+        { id: "a", text: "I'm mostly working privately, learning before I share.", value: 1 },
+        { id: "b", text: "I'm starting to put myself out there but it feels inconsistent.", value: 2 },
+        { id: "c", text: "I have a steady presence that people recognize.", value: 3 },
+        { id: "d", text: "I'm known for my expertise and people seek me out.", value: 4 },
+        { id: "e", text: "My work speaks for itself and creates opportunities I don't have to chase.", value: 5 }
       ]
     },
     {
       id: "q7",
-      question: "How do you spend your energy day-to-day?",
+      question: "How do you respond to friction or setbacks?",
       options: [
-        { id: "a", text: "Exploring possibilities, connecting with mentors, and testing new ideas.", value: 1 },
-        { id: "b", text: "Building momentum, putting effort into tasks, and creating structure.", value: 2 },
-        { id: "c", text: "Maintaining routines, systems, and stability while considering new challenges.", value: 3 },
-        { id: "d", text: "Expressing yourself, sharing ideas, and applying your expertise for success.", value: 4 },
-        { id: "e", text: "Leading, mentoring, and creating systems to sustain long-term impact.", value: 5 }
+        { id: "a", text: "I seek advice and reassurance before deciding how to proceed.", value: 1 },
+        { id: "b", text: "I push through and try different approaches until something works.", value: 2 },
+        { id: "c", text: "I analyze carefully and make measured adjustments.", value: 3 },
+        { id: "d", text: "I trust my experience and adapt confidently.", value: 4 },
+        { id: "e", text: "I see friction as refinement—it strengthens my purpose and impact.", value: 5 }
       ]
     },
     {
       id: "q8",
-      question: "How do you measure progress or fulfillment right now?",
+      question: "How engaged are others with your work or vision?",
       options: [
-        { id: "a", text: "By exploring possibilities, gaining clarity, and learning from guidance.", value: 1 },
-        { id: "b", text: "By momentum, consistency, and seeing tangible results.", value: 2 },
-        { id: "c", text: "By stability, competence, and building a reliable foundation.", value: 3 },
-        { id: "d", text: "By authentic expression, influence, and meaningful outcomes.", value: 4 },
-        { id: "e", text: "By impact, legacy, and how I elevate others while living purposefully.", value: 5 }
+        { id: "a", text: "I'm still building connections and learning who my people are.", value: 1 },
+        { id: "b", text: "Some people are interested but engagement is inconsistent.", value: 2 },
+        { id: "c", text: "I have a reliable community or audience that trusts me.", value: 3 },
+        { id: "d", text: "People actively seek my perspective and want to work with me.", value: 4 },
+        { id: "e", text: "I'm cultivating leaders and my vision extends through others.", value: 5 }
       ]
     },
     {
       id: "q9",
-      question: "What do you feel you're good at in this stage of your journey?",
+      question: "What feels most needed for you next?",
       options: [
-        { id: "a", text: "Curiosity, learning from others, and exploring possibilities.", value: 1 },
-        { id: "b", text: "Putting in effort, building momentum, and taking action.", value: 2 },
-        { id: "c", text: "Maintaining stability, reliability, and consistency.", value: 3 },
-        { id: "d", text: "Expressing your authentic self, applying expertise meaningfully, and inspiring confidence.", value: 4 },
-        { id: "e", text: "Leading, mentoring, and creating lasting impact through purpose and influence.", value: 5 }
-      ]
-    },
-    {
-      id: "q10",
-      question: "What do you feel is blocking you from success right now?",
-      options: [
-        { id: "a", text: "So many possibilities that it's hard to choose a direction.", value: 1 },
-        { id: "b", text: "Too much effort without clear systems or focus.", value: 2 },
-        { id: "c", text: "Comparing yourself to others, overworking to maintain stability, or feeling hesitant to grow.", value: 3 },
-        { id: "d", text: "Comfortable with your level of mastery but unsure how to evolve meaningfully.", value: 4 },
-        { id: "e", text: "Feeling like everything depends on you and taking it all on.", value: 5 }
-      ]
-    },
-    {
-      id: "q11",
-      question: "What excites you most about the future?",
-      options: [
-        { id: "a", text: "Learning from mentors, exploring paths, and discovering where I belong.", value: 1 },
-        { id: "b", text: "Turning effort into progress and seeing results from my work.", value: 2 },
-        { id: "c", text: "Expanding beyond my comfort zone while staying grounded in stability.", value: 3 },
-        { id: "d", text: "Expressing your authentic self and making meaningful contributions.", value: 4 },
-        { id: "e", text: "Leaving a legacy, mentoring others, and creating lasting impact.", value: 5 }
+        { id: "a", text: "Guidance and clarity on which path to pursue.", value: 1 },
+        { id: "b", text: "Systems, focus, and sustainable momentum.", value: 2 },
+        { id: "c", text: "Confidence to stretch beyond my comfort zone.", value: 3 },
+        { id: "d", text: "Opportunities to fully express my expertise and influence.", value: 4 },
+        { id: "e", text: "Ways to multiply my impact and create lasting legacy.", value: 5 }
       ]
     }
   ],
