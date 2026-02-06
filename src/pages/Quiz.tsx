@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "@/contexts/QuizContext";
+import { calculateLiftScore } from "@/lib/liftScoring";
+import type { UserAnswer } from "@/types/quiz";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -19,7 +21,7 @@ const LEVEL_MAP: Record<number, string> = {
 
 const Quiz = () => {
   const navigate = useNavigate();
-  const { quizData, addAnswer, removeLastAnswer, resetAnswers, userAnswers, isLoading, calculateScore } = useQuiz();
+  const { quizData, addAnswer, removeLastAnswer, resetAnswers, userAnswers, isLoading } = useQuiz();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [started, setStarted] = useState(false);
   const [isAnswering, setIsAnswering] = useState(false);
@@ -101,22 +103,22 @@ const Quiz = () => {
   }, [userAnswers.length, quizData.questions.length]);
 
   // Handle quiz completion - calculate score and redirect directly
-  const handleQuizComplete = () => {
+  const handleQuizComplete = (answersSnapshot: UserAnswer[]) => {
     setIsRedirecting(true);
-    
+
     // Small delay to show the loading state
     setTimeout(() => {
-      const score = calculateScore();
+      const score = calculateLiftScore(answersSnapshot);
       const levelId = LEVEL_MAP[score];
-      const result = quizData.results.find(r => r.id === levelId);
-      
-      if (result?.redirectUrl && result.redirectUrl.startsWith('https://')) {
+      const result = quizData.results.find((r) => r.id === levelId);
+
+      if (result?.redirectUrl && result.redirectUrl.startsWith("https://")) {
         resetAnswers();
         window.location.href = result.redirectUrl;
       } else {
         // Fallback to main site
         resetAnswers();
-        window.location.href = 'https://elanoura.com';
+        window.location.href = "https://elanoura.com";
       }
     }, 100);
   };
@@ -169,23 +171,26 @@ const Quiz = () => {
 
   const handleAnswer = (optionId: string, value: number) => {
     if (isAnswering) return; // Prevent multiple clicks
-    
+
     setIsAnswering(true);
-    
-    addAnswer({
+
+    const newAnswer: UserAnswer = {
       questionId: currentQuestion.id,
       selectedOptionId: optionId,
-      value
-    });
+      value,
+    };
+    const answersSnapshot = [...userAnswers, newAnswer];
+
+    addAnswer(newAnswer);
 
     // Wait for animation to complete before moving to next question
     setTimeout(() => {
       if (currentQuestionIndex < quizData.questions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
+        setCurrentQuestionIndex((prev) => prev + 1);
         setIsAnswering(false);
       } else {
         // Quiz complete - calculate score and redirect directly
-        handleQuizComplete();
+        handleQuizComplete(answersSnapshot);
       }
     }, 400);
   };
