@@ -1,26 +1,75 @@
 
 
-# Fix Mobile Start Screen Layout
+# Log Quiz Completions to Google Sheets
 
-## Issues Identified
+## How It Works
 
-1. **Logo overlaps title**: The logo uses `absolute top-[30px]` positioning, which sits on top of the card content since the card is centered in the viewport.
-2. **Excessive padding**: The card uses `p-12` (3rem / 48px) on all sides, which eats into the limited mobile width and makes text hard to read.
+When someone completes the quiz, the app will send their answers and result to a Google Sheet via a free Google Apps Script webhook. Each completion becomes a new row.
 
-## Changes
+### Your Google Sheet Layout
 
-### `src/pages/Quiz.tsx` (Start screen section, ~lines 228-280)
+| Timestamp | Q1 | Q2 | Q3 | Q4 | Q5 | Q6 | Q7 | Q8 | Q9 | Result |
+|-----------|----|----|----|----|----|----|----|----|----|----|
+| 2026-02-07 14:30 | 4 | 5 | 2 | 1 | 3 | 4 | 5 | 3 | 2 | Steadfast |
 
-1. **Move logo out of absolute positioning on mobile**: Change the logo from `absolute` to being part of the normal document flow above the card, so it sits above the title instead of overlapping it. Add a margin-bottom to space it from the card content.
+---
 
-2. **Reduce card padding on mobile**: Change `p-12` to `p-6 md:p-12` so mobile gets 1.5rem padding while desktop keeps the current 3rem.
+## Setup Steps (one-time, ~5 minutes)
 
-3. **Reduce title size on mobile**: Change `text-5xl` to `text-3xl md:text-5xl` for the heading so it fits better on small screens.
+You'll need to create a free Google Apps Script webhook that accepts data and writes it to your sheet:
 
-### Technical Details
+1. Create a new Google Sheet
+2. Go to **Extensions > Apps Script**
+3. Paste a small script (I'll provide it) that receives data and appends rows
+4. Click **Deploy > New deployment > Web app** (set access to "Anyone")
+5. Copy the webhook URL and paste it into your app's admin settings or as a configuration
 
-- Logo: Replace `absolute top-[30px] left-1/2 -translate-x-1/2 z-10` with a flex-column layout that places the logo above the card in normal flow, with `mb-8` spacing.
-- Card padding: `p-12` becomes `p-6 md:p-12`
-- Title: `text-5xl` becomes `text-3xl md:text-5xl`
-- The page container's `padding: 1.5rem` from `containers.css` is fine and stays unchanged.
+---
+
+## Technical Implementation
+
+### 1. New Edge Function: `log-quiz-completion`
+
+A backend function that receives the quiz answers and result, then forwards them to the Google Apps Script webhook URL. This keeps the webhook URL server-side and handles errors gracefully without blocking the user's redirect.
+
+**Input**: `{ answers: number[], result: string, timestamp: string }`
+**Output**: `{ success: boolean }`
+
+The function will:
+- Accept the answers array (values 1-5) and result name
+- POST to the Google Apps Script webhook URL
+- Return success/failure (non-blocking to the user)
+
+### 2. Store the Webhook URL as a Secret
+
+The Google Apps Script webhook URL will be stored as a backend secret (`GOOGLE_SHEETS_WEBHOOK_URL`) so it's not exposed in frontend code.
+
+### 3. Update `src/pages/Quiz.tsx`
+
+In the `handleQuizComplete` function (around line 106), after calculating the score and before redirecting, fire off the logging call:
+
+```text
+1. Calculate score and determine result (existing)
+2. NEW: Call edge function with answers + result (fire-and-forget, non-blocking)
+3. Redirect to result URL (existing)
+```
+
+The logging is fire-and-forget -- it won't delay the redirect or show errors to the user.
+
+### 4. Google Apps Script (provided for you to paste)
+
+I'll provide a ready-to-use script that:
+- Receives POST requests with quiz data
+- Appends a row with timestamp + 9 answer values + result name
+- Returns success response
+
+---
+
+## Files to Create/Modify
+
+| File | Change |
+|------|--------|
+| `supabase/functions/log-quiz-completion/index.ts` | **New** -- Edge function to forward data to Google Sheets |
+| `supabase/config.toml` | Add function config with `verify_jwt = false` (public endpoint) |
+| `src/pages/Quiz.tsx` | Add fire-and-forget call to log completion before redirect |
 
