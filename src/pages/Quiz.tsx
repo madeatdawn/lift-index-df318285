@@ -226,31 +226,31 @@ const Quiz = () => {
 
   if (!started) {
     return (
-      <div className="page-container">
-      {/* Logo */}
-      <a 
-        href="https://elanoura.com/" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="absolute top-[30px] left-1/2 -translate-x-1/2 z-10"
-      >
-        <img src={elanourIcon} alt="Élanoura" className="w-[50px]" />
-      </a>
-
+    <div className="page-container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="content-container-narrow"
+          className="content-container-narrow flex flex-col items-center"
         >
-          <Card className="card-elevated p-12 text-center">
+          {/* Logo */}
+          <a 
+            href="https://elanoura.com/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="mb-8"
+          >
+            <img src={elanourIcon} alt="Élanoura" className="w-[50px]" />
+          </a>
+
+          <Card className="card-elevated p-6 md:p-12 text-center">
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
               <h1 
-                className="text-5xl mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
+                className="text-3xl md:text-5xl mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
                 style={{ fontFamily: 'EditorsNote-Extralight, sans-serif', fontStyle: 'normal', fontWeight: 200 }}
               >
                 The LIFT Index Assessment
