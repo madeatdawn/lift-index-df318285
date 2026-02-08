@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "@/contexts/QuizContext";
 import { calculateLiftScore } from "@/lib/liftScoring";
+import { supabase } from "@/integrations/supabase/client";
 import type { UserAnswer } from "@/types/quiz";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -132,6 +133,18 @@ const Quiz = () => {
         levelId,
         matchedResultId: result?.id,
         redirectUrl: result?.redirectUrl,
+      });
+
+      // Fire-and-forget: log completion to Google Sheets
+      supabase.functions.invoke('log-quiz-completion', {
+        body: {
+          answers: answersSnapshot.map((a) => a.value),
+          result: result?.name || levelId,
+          timestamp: new Date().toISOString(),
+        },
+      }).then(({ error }) => {
+        if (error) console.warn("[LIFT] Sheet logging failed:", error);
+        else console.info("[LIFT] Sheet logging succeeded");
       });
 
       if (result?.redirectUrl && result.redirectUrl.startsWith("https://")) {
