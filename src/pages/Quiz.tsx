@@ -140,19 +140,22 @@ const Quiz = () => {
         ? result.redirectUrl
         : "https://elanoura.com";
 
-      // Use navigator.sendBeacon for reliable logging that survives page navigation
+      // Use fetch with keepalive to survive page navigation (unlike sendBeacon, supports headers)
       const logPayload = JSON.stringify({
         answers: answersSnapshot.map((a) => a.value),
         result: result?.name || levelId,
         timestamp: new Date().toISOString(),
       });
 
-      const beaconUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/log-quiz-completion`;
-      const beaconSent = navigator.sendBeacon(
-        beaconUrl,
-        new Blob([logPayload], { type: 'application/json' })
-      );
-      console.info("[LIFT] Beacon sent:", beaconSent);
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/log-quiz-completion`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: logPayload,
+        keepalive: true,
+      }).catch((err) => console.warn("[LIFT] Sheet logging failed:", err));
 
       resetAnswers();
       window.location.href = redirectUrl;
