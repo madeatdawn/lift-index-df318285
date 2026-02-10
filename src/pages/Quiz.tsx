@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "@/contexts/QuizContext";
 import { calculateLiftScore } from "@/lib/liftScoring";
-import { supabase } from "@/integrations/supabase/client";
+
 import type { UserAnswer } from "@/types/quiz";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -135,26 +135,27 @@ const Quiz = () => {
         redirectUrl: result?.redirectUrl,
       });
 
-      // Fire-and-forget: log completion to Google Sheets
-      supabase.functions.invoke('log-quiz-completion', {
-        body: {
-          answers: answersSnapshot.map((a) => a.value),
-          result: result?.name || levelId,
-          timestamp: new Date().toISOString(),
-        },
-      }).then(({ error }) => {
-        if (error) console.warn("[LIFT] Sheet logging failed:", error);
-        else console.info("[LIFT] Sheet logging succeeded");
+      // Log completion to Google Sheets, then redirect
+      const redirectUrl = (result?.redirectUrl && result.redirectUrl.startsWith("https://"))
+        ? result.redirectUrl
+        : "https://elanoura.com";
+
+      // Use navigator.sendBeacon for reliable logging that survives page navigation
+      const logPayload = JSON.stringify({
+        answers: answersSnapshot.map((a) => a.value),
+        result: result?.name || levelId,
+        timestamp: new Date().toISOString(),
       });
 
-      if (result?.redirectUrl && result.redirectUrl.startsWith("https://")) {
-        resetAnswers();
-        window.location.href = result.redirectUrl;
-      } else {
-        // Fallback to main site
-        resetAnswers();
-        window.location.href = "https://elanoura.com";
-      }
+      const beaconUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/log-quiz-completion`;
+      const beaconSent = navigator.sendBeacon(
+        beaconUrl,
+        new Blob([logPayload], { type: 'application/json' })
+      );
+      console.info("[LIFT] Beacon sent:", beaconSent);
+
+      resetAnswers();
+      window.location.href = redirectUrl;
     }, 100);
   };
 
