@@ -40,11 +40,25 @@ const mapReferrerToSource = (referrer: string): string => {
   }
 };
 
+const detectInAppBrowser = (): string | null => {
+  const ua = (navigator.userAgent || navigator.vendor || '').toLowerCase();
+  if (ua.includes('instagram')) return 'instagram';
+  if (ua.includes('bytedancewebview') || ua.includes('musical_ly') || ua.includes('tiktok')) return 'tiktok';
+  if (ua.includes('fban') || ua.includes('fbav') || ua.includes('fb_iab') || ua.includes('fbbv')) return 'facebook';
+  if (ua.includes('twitterandroid') || ua.includes('twitteriphone')) return 'twitter';
+  if (ua.includes('linkedinapp')) return 'linkedin';
+  if (ua.includes('pinterest')) return 'pinterest';
+  return null;
+};
+
 const detectTrafficSource = (): string => {
   const params = new URLSearchParams(window.location.search);
   const utmSource = params.get('utm_source');
   if (utmSource) return utmSource.toLowerCase();
   if (document.referrer) return mapReferrerToSource(document.referrer);
+  // Fallback: detect in-app browsers by user agent (e.g. Instagram DMs strip referrer)
+  const inAppBrowser = detectInAppBrowser();
+  if (inAppBrowser) return inAppBrowser;
   return 'direct';
 };
 
