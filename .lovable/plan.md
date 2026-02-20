@@ -1,75 +1,90 @@
 
+# Track Traffic Source & Log to Google Sheet
 
-# Log Quiz Completions to Google Sheets
+## What This Does
 
-## How It Works
+When someone visits the quiz — whether from an Instagram bio link, a TikTok link, a Gmail email, or anywhere else — the app will automatically detect where they came from and include that in the Google Sheet row alongside their answers and result.
 
-When someone completes the quiz, the app will send their answers and result to a Google Sheet via a free Google Apps Script webhook. Each completion becomes a new row.
+### How Traffic Source Is Detected
 
-### Your Google Sheet Layout
+Two signals will be captured on page load and stored throughout the quiz session:
 
-| Timestamp | Q1 | Q2 | Q3 | Q4 | Q5 | Q6 | Q7 | Q8 | Q9 | Result |
-|-----------|----|----|----|----|----|----|----|----|----|----|
-| 2026-02-07 14:30 | 4 | 5 | 2 | 1 | 3 | 4 | 5 | 3 | 2 | Steadfast |
+1. **UTM parameters** — these are tags you (or a link tool) can add to quiz URLs, e.g. `?utm_source=instagram&utm_campaign=february`. If someone clicks a link with these tags, the source is exact.
 
----
+2. **HTTP Referrer** — the browser automatically tells websites what page the user came from. So if someone clicks from Gmail, the referrer is `mail.google.com`. From Instagram's in-app browser it might be `instagram.com`, etc.
 
-## Setup Steps (one-time, ~5 minutes)
+The app reads both on arrival, picks the best one (UTM wins over referrer), and holds onto it for the duration of the quiz.
 
-You'll need to create a free Google Apps Script webhook that accepts data and writes it to your sheet:
+### Google Sheet Column Layout (Updated)
 
-1. Create a new Google Sheet
-2. Go to **Extensions > Apps Script**
-3. Paste a small script (I'll provide it) that receives data and appends rows
-4. Click **Deploy > New deployment > Web app** (set access to "Anyone")
-5. Copy the webhook URL and paste it into your app's admin settings or as a configuration
+| Timestamp | Q1 | Q2 | Q3 | Q4 | Q5 | Q6 | Q7 | Q8 | Q9 | Result | Source |
+|-----------|----|----|----|----|----|----|----|----|----|----|--------|--------|
+| 2026-02-20 10:00 | 4 | 5 | 2 | 1 | 3 | 4 | 5 | 3 | 2 | Steadfast | instagram |
 
 ---
 
-## Technical Implementation
+## Files to Change
 
-### 1. New Edge Function: `log-quiz-completion`
+### 1. `src/pages/Quiz.tsx`
 
-A backend function that receives the quiz answers and result, then forwards them to the Google Apps Script webhook URL. This keeps the webhook URL server-side and handles errors gracefully without blocking the user's redirect.
+On component mount, read `document.referrer` and any UTM parameters from the URL (`window.location.search`). Store the detected source in a `useRef` so it persists across question renders without causing re-renders.
 
-**Input**: `{ answers: number[], result: string, timestamp: string }`
-**Output**: `{ success: boolean }`
-
-The function will:
-- Accept the answers array (values 1-5) and result name
-- POST to the Google Apps Script webhook URL
-- Return success/failure (non-blocking to the user)
-
-### 2. Store the Webhook URL as a Secret
-
-The Google Apps Script webhook URL will be stored as a backend secret (`GOOGLE_SHEETS_WEBHOOK_URL`) so it's not exposed in frontend code.
-
-### 3. Update `src/pages/Quiz.tsx`
-
-In the `handleQuizComplete` function (around line 106), after calculating the score and before redirecting, fire off the logging call:
+At quiz completion, include the `source` field in the payload sent to the backend function:
 
 ```text
-1. Calculate score and determine result (existing)
-2. NEW: Call edge function with answers + result (fire-and-forget, non-blocking)
-3. Redirect to result URL (existing)
+{
+  answers: [4, 5, 2, 1, 3, 4, 5, 3, 2],
+  result: "Steadfast",
+  timestamp: "2026-02-20T10:00:00.000Z",
+  source: "instagram"         ← new field
+}
 ```
 
-The logging is fire-and-forget -- it won't delay the redirect or show errors to the user.
+Source detection logic (priority order):
+1. `utm_source` query param → use as-is (e.g. `instagram`, `tiktok`, `newsletter`)
+2. `document.referrer` hostname → simplified (e.g. `mail.google.com` → `gmail`, `t.co` → `twitter/x`, `l.instagram.com` → `instagram`)
+3. No referrer + no UTM → `"direct"`
 
-### 4. Google Apps Script (provided for you to paste)
+### 2. `supabase/functions/log-quiz-completion/index.ts`
 
-I'll provide a ready-to-use script that:
-- Receives POST requests with quiz data
-- Appends a row with timestamp + 9 answer values + result name
-- Returns success response
+Accept the optional `source` field from the request body and pass it through to the Google Sheets webhook:
+
+```text
+{ answers, result, timestamp, source }  →  forwarded to webhook as-is
+```
+
+### 3. Google Apps Script (you update manually)
+
+The Apps Script in your Google Sheet needs one extra field appended to the row. You'll paste a small update:
+
+```javascript
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+  
+  var row = [
+    data.timestamp,
+    ...data.answers,
+    data.result,
+    data.source || "unknown"   // ← add this
+  ];
+  
+  sheet.appendRow(row);
+  
+  return ContentService
+    .createTextOutput(JSON.stringify({ success: true }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+```
+
+You'll also want to add a "Source" header to column L in the sheet manually.
 
 ---
 
-## Files to Create/Modify
+## Technical Notes
 
-| File | Change |
-|------|--------|
-| `supabase/functions/log-quiz-completion/index.ts` | **New** -- Edge function to forward data to Google Sheets |
-| `supabase/config.toml` | Add function config with `verify_jwt = false` (public endpoint) |
-| `src/pages/Quiz.tsx` | Add fire-and-forget call to log completion before redirect |
-
+- The source is captured once when the page loads and stored in a `useRef` — it won't be lost even as the user navigates through questions.
+- UTM parameters are only read from the initial URL when the page first loads (not from the current URL during the quiz, which doesn't change).
+- Common referrers will be mapped to friendly names: `mail.google.com` → `gmail`, `t.co` / `twitter.com` → `twitter`, `l.instagram.com` / `instagram.com` → `instagram`, `lnkd.in` → `linkedin`, `facebook.com` / `fb.com` → `facebook`, etc.
+- If neither signal is present, the source is logged as `direct`.
+- This is purely client-side and requires no new secrets or database tables.
