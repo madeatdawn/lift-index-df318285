@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { answers, result, timestamp } = await req.json();
+    const { answers, result, timestamp, source } = await req.json();
 
     if (!answers || !result) {
       console.error("[log-quiz] Missing required fields", { answers, result });
@@ -30,12 +30,12 @@ serve(async (req) => {
       });
     }
 
-    console.log("[log-quiz] Forwarding to Google Sheets", { answersCount: answers.length, result, timestamp });
+    console.log("[log-quiz] Forwarding to Google Sheets", { answersCount: answers.length, result, timestamp, source });
 
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answers, result, timestamp }),
+      body: JSON.stringify({ answers, result, timestamp, source: source || 'unknown' }),
     });
 
     const responseText = await response.text();
