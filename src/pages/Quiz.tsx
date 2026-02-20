@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "@/contexts/QuizContext";
 import { calculateLiftScore } from "@/lib/liftScoring";
@@ -20,9 +20,38 @@ const LEVEL_MAP: Record<number, string> = {
   5: 'significance'
 };
 
+// Map referrer hostnames to friendly source names
+const mapReferrerToSource = (referrer: string): string => {
+  try {
+    const hostname = new URL(referrer).hostname.toLowerCase();
+    if (hostname.includes('instagram.com') || hostname.includes('l.instagram.com')) return 'instagram';
+    if (hostname.includes('tiktok.com')) return 'tiktok';
+    if (hostname.includes('mail.google.com') || hostname.includes('gmail.com')) return 'gmail';
+    if (hostname.includes('t.co') || hostname.includes('twitter.com') || hostname.includes('x.com')) return 'twitter';
+    if (hostname.includes('facebook.com') || hostname.includes('fb.com') || hostname.includes('l.facebook.com')) return 'facebook';
+    if (hostname.includes('lnkd.in') || hostname.includes('linkedin.com')) return 'linkedin';
+    if (hostname.includes('pinterest.com')) return 'pinterest';
+    if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) return 'youtube';
+    if (hostname.includes('mail.yahoo.com')) return 'yahoo-mail';
+    if (hostname.includes('outlook.com') || hostname.includes('hotmail.com')) return 'outlook';
+    return hostname; // fallback: use the raw hostname
+  } catch {
+    return 'direct';
+  }
+};
+
+const detectTrafficSource = (): string => {
+  const params = new URLSearchParams(window.location.search);
+  const utmSource = params.get('utm_source');
+  if (utmSource) return utmSource.toLowerCase();
+  if (document.referrer) return mapReferrerToSource(document.referrer);
+  return 'direct';
+};
+
 const Quiz = () => {
   const navigate = useNavigate();
   const { quizData, addAnswer, removeLastAnswer, resetAnswers, userAnswers, isLoading } = useQuiz();
+  const trafficSource = useRef<string>(detectTrafficSource());
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [started, setStarted] = useState(false);
   const [isAnswering, setIsAnswering] = useState(false);
@@ -145,6 +174,7 @@ const Quiz = () => {
         answers: answersSnapshot.map((a) => a.value),
         result: result?.name || levelId,
         timestamp: new Date().toISOString(),
+        source: trafficSource.current,
       });
 
       fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/log-quiz-completion`, {
