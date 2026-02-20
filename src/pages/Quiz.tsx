@@ -169,7 +169,7 @@ const Quiz = () => {
         ? result.redirectUrl
         : "https://elanoura.com";
 
-      // Use fetch with keepalive to survive page navigation (unlike sendBeacon, supports headers)
+      // Log to Google Sheets FIRST, then redirect (await with timeout so redirect isn't blocked forever)
       const logPayload = JSON.stringify({
         answers: answersSnapshot.map((a) => a.value),
         result: result?.name || levelId,
@@ -177,18 +177,24 @@ const Quiz = () => {
         source: trafficSource.current,
       });
 
-      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/log-quiz-completion`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-        },
-        body: logPayload,
-        keepalive: true,
-      }).catch((err) => console.warn("[LIFT] Sheet logging failed:", err));
+      const logWithTimeout = Promise.race([
+        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/log-quiz-completion`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: logPayload,
+        }),
+        new Promise<void>((resolve) => setTimeout(resolve, 3000)), // max 3s wait
+      ]);
 
-      resetAnswers();
-      window.location.href = redirectUrl;
+      logWithTimeout
+        .catch((err) => console.warn("[LIFT] Sheet logging failed:", err))
+        .finally(() => {
+          resetAnswers();
+          window.location.href = redirectUrl;
+        });
     }, 100);
   };
 
