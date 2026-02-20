@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
 import { AdminPasswordGate } from "@/components/AdminPasswordGate";
-import { QuizQuestion } from "@/types/quiz";
+import { QuizQuestion, ResultLevel } from "@/types/quiz";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -36,6 +36,58 @@ const Admin = () => {
     const newData = { ...editedData };
     newData.questions[questionIndex].options[optionIndex].text = value;
     setEditedData(newData);
+  };
+
+  const updateOptionValue = (questionIndex: number, optionIndex: number, value: number) => {
+    const newData = { ...editedData };
+    newData.questions[questionIndex].options[optionIndex].value = value;
+    setEditedData(newData);
+  };
+
+  const addOption = (questionIndex: number) => {
+    const newData = { ...editedData };
+    const options = newData.questions[questionIndex].options;
+    const newId = `opt_${Date.now()}`;
+    options.push({ id: newId, text: "New option - edit this text", value: 1 });
+    setEditedData(newData);
+    toast.info("Option added. Don't forget to save!");
+  };
+
+  const removeOption = (questionIndex: number, optionIndex: number) => {
+    const newData = { ...editedData };
+    if (newData.questions[questionIndex].options.length <= 2) {
+      toast.error("Each question must have at least 2 options.");
+      return;
+    }
+    newData.questions[questionIndex].options = newData.questions[questionIndex].options.filter((_, i) => i !== optionIndex);
+    setEditedData(newData);
+    toast.info("Option removed. Don't forget to save!");
+  };
+
+  const addResult = () => {
+    const newResult: ResultLevel = {
+      id: `result_${Date.now()}`,
+      name: "New Result",
+      minScore: 0,
+      maxScore: 0,
+      description: "Edit this description",
+      embedHTML: "",
+      redirectUrl: "",
+    };
+    setEditedData({ ...editedData, results: [...editedData.results, newResult] });
+    toast.info("Result added. Don't forget to save!");
+  };
+
+  const removeResult = (resultIndex: number) => {
+    if (editedData.results.length <= 1) {
+      toast.error("You must have at least one result.");
+      return;
+    }
+    setEditedData({
+      ...editedData,
+      results: editedData.results.filter((_, i) => i !== resultIndex),
+    });
+    toast.info("Result removed. Don't forget to save!");
   };
 
   const updateResult = (resultIndex: number, field: string, value: string | number) => {
@@ -154,11 +206,23 @@ const Admin = () => {
                         <Input
                           type="number"
                           value={option.value}
-                          disabled
+                          onChange={(e) => updateOptionValue(qIndex, oIndex, parseFloat(e.target.value) || 0)}
                           className="w-16 text-center"
                         />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeOption(qIndex, oIndex)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
                       </div>
                     ))}
+                    <Button variant="outline" size="sm" onClick={() => addOption(qIndex)} className="gap-1 mt-1">
+                      <Plus className="h-3 w-3" />
+                      Add Option
+                    </Button>
                   </div>
                 </div>
               </Card>
@@ -173,10 +237,17 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="results" className="space-y-6">
+            <div className="flex justify-end">
+              <Button onClick={addResult} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Result
+              </Button>
+            </div>
             {editedData.results.map((result, rIndex) => (
               <Card key={result.id} className="p-6" style={{ background: "var(--gradient-card)" }}>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="flex items-start justify-between gap-4">
+                  <div className="grid grid-cols-3 gap-4 flex-1">
                     <div>
                       <label className="text-sm font-medium text-muted-foreground mb-2 block">
                         Result Name
@@ -208,6 +279,15 @@ const Admin = () => {
                         onChange={(e) => updateResult(rIndex, "maxScore", e.target.value)}
                       />
                     </div>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => removeResult(rIndex)}
+                    className="mt-6"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                   </div>
 
                   <div>
