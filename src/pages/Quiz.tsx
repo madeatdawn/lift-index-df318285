@@ -150,66 +150,54 @@ const Quiz = () => {
   const handleQuizComplete = (answersSnapshot: UserAnswer[]) => {
     setIsRedirecting(true);
 
-    // Small delay to show the loading state
-    setTimeout(() => {
-      const score = calculateLiftScore(answersSnapshot);
+    const score = calculateLiftScore(answersSnapshot);
 
-      // Edge case: no valid answers
-      if (score === 0) {
-        console.info("[LIFT] No valid answers; resetting quiz", {
-          rawValues: answersSnapshot.map((a) => a.value),
-        });
-
-        setIsRedirecting(false);
-        resetAnswers();
-        setCurrentQuestionIndex(0);
-        setStarted(false);
-        return;
-      }
-
-      const levelId = LEVEL_MAP[score];
-      const result = quizData.results.find((r) => r.id === levelId);
-
-      console.info("[LIFT] Quiz complete", {
+    // Edge case: no valid answers
+    if (score === 0) {
+      console.info("[LIFT] No valid answers; resetting quiz", {
         rawValues: answersSnapshot.map((a) => a.value),
-        score,
-        levelId,
-        matchedResultId: result?.id,
-        redirectUrl: result?.redirectUrl,
       });
 
-      // Log completion to Google Sheets, then redirect
-      const redirectUrl = (result?.redirectUrl && result.redirectUrl.startsWith("https://"))
-        ? result.redirectUrl
-        : "https://elanoura.com";
+      setIsRedirecting(false);
+      resetAnswers();
+      setCurrentQuestionIndex(0);
+      setStarted(false);
+      return;
+    }
 
-      // Log to Google Sheets FIRST, then redirect (await with timeout so redirect isn't blocked forever)
-      const logPayload = JSON.stringify({
+    const levelId = LEVEL_MAP[score];
+    const result = quizData.results.find((r) => r.id === levelId);
+
+    console.info("[LIFT] Quiz complete", {
+      rawValues: answersSnapshot.map((a) => a.value),
+      score,
+      levelId,
+      matchedResultId: result?.id,
+      redirectUrl: result?.redirectUrl,
+    });
+
+    const redirectUrl = (result?.redirectUrl && result.redirectUrl.startsWith("https://"))
+      ? result.redirectUrl
+      : "https://elanoura.com";
+
+    // Fire-and-forget: log to Google Sheets in background, don't block redirect
+    fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/log-quiz-completion`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      },
+      body: JSON.stringify({
         answers: answersSnapshot.map((a) => a.value),
         result: result?.name || levelId,
         timestamp: new Date().toISOString(),
         source: trafficSource.current,
-      });
+      }),
+    }).catch((err) => console.warn("[LIFT] Sheet logging failed:", err));
 
-      const logWithTimeout = Promise.race([
-        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/log-quiz-completion`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          },
-          body: logPayload,
-        }),
-        new Promise<void>((resolve) => setTimeout(resolve, 3000)), // max 3s wait
-      ]);
-
-      logWithTimeout
-        .catch((err) => console.warn("[LIFT] Sheet logging failed:", err))
-        .finally(() => {
-          resetAnswers();
-          window.location.href = redirectUrl;
-        });
-    }, 100);
+    // Redirect immediately
+    resetAnswers();
+    window.location.href = redirectUrl;
   };
 
   // Show redirecting state

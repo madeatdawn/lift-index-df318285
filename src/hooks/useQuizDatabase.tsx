@@ -11,29 +11,20 @@ export const useQuizDatabase = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch questions
-      const { data: questionsData, error: questionsError } = await supabase
-        .from("quiz_questions")
-        .select("*")
-        .order("sort_order");
+      // Fetch all data in parallel
+      const [questionsResult, optionsResult, resultsResult] = await Promise.all([
+        supabase.from("quiz_questions").select("*").order("sort_order"),
+        supabase.from("quiz_options").select("*").order("sort_order"),
+        supabase.from("quiz_results").select("*").order("sort_order"),
+      ]);
 
-      if (questionsError) throw questionsError;
+      if (questionsResult.error) throw questionsResult.error;
+      if (optionsResult.error) throw optionsResult.error;
+      if (resultsResult.error) throw resultsResult.error;
 
-      // Fetch options
-      const { data: optionsData, error: optionsError } = await supabase
-        .from("quiz_options")
-        .select("*")
-        .order("sort_order");
-
-      if (optionsError) throw optionsError;
-
-      // Fetch results
-      const { data: resultsData, error: resultsError } = await supabase
-        .from("quiz_results")
-        .select("*")
-        .order("sort_order");
-
-      if (resultsError) throw resultsError;
+      const questionsData = questionsResult.data;
+      const optionsData = optionsResult.data;
+      const resultsData = resultsResult.data;
 
       // Transform database data to QuizData format
       const questions: QuizQuestion[] = (questionsData || []).map((q) => ({

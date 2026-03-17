@@ -19,9 +19,15 @@ interface QuizContextType {
 const QuizContext = createContext<QuizContextType | undefined>(undefined);
 
 export const QuizProvider = ({ children }: { children: ReactNode }) => {
-  const [quizData, setQuizData] = useState<QuizData>(initialQuizData);
+  const [quizData, setQuizData] = useState<QuizData>(() => {
+    // Load cached quiz data from sessionStorage for instant rendering
+    const cached = sessionStorage.getItem('quizData');
+    if (cached) {
+      try { return JSON.parse(cached); } catch { /* fall through */ }
+    }
+    return initialQuizData;
+  });
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>(() => {
-    // Load saved answers from localStorage
     const saved = localStorage.getItem('quizAnswers');
     return saved ? JSON.parse(saved) : [];
   });
@@ -32,7 +38,6 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
     loadQuizData();
   }, []);
 
-  // Save answers to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('quizAnswers', JSON.stringify(userAnswers));
   }, [userAnswers]);
@@ -42,8 +47,8 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
     
     if (data && data.questions.length > 0) {
       setQuizData(data);
+      sessionStorage.setItem('quizData', JSON.stringify(data));
     }
-    // If no database data, keep using initialQuizData (already set)
   };
 
   const updateQuizData = async (data: QuizData) => {
