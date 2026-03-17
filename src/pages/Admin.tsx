@@ -18,6 +18,18 @@ const Admin = () => {
   const navigate = useNavigate();
   const { quizData, updateQuizData } = useQuiz();
   const [editedData, setEditedData] = useState(quizData);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  const handleDragEnd = (questionIndex: number) => (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const newData = { ...editedData };
+    const options = newData.questions[questionIndex].options;
+    const oldIndex = options.findIndex((o) => o.id === active.id);
+    const newIndex = options.findIndex((o) => o.id === over.id);
+    newData.questions[questionIndex].options = arrayMove(options, oldIndex, newIndex);
+    setEditedData(newData);
+  };
 
   useEffect(() => {
     setEditedData(quizData);
