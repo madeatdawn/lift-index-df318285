@@ -207,33 +207,22 @@ const Admin = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <label className="text-sm font-medium text-muted-foreground">Options (ABCDE scoring: 1-5)</label>
-                    {question.options.map((option, oIndex) => (
-                      <div key={option.id} className="flex gap-2 items-start">
-                        <span className="mt-3 text-sm font-medium text-primary">
-                          {option.id.toUpperCase()})
-                        </span>
-                        <Textarea
-                          value={option.text}
-                          onChange={(e) => updateOption(qIndex, oIndex, e.target.value)}
-                          className="flex-1"
-                        />
-                        <Input
-                          type="number"
-                          value={option.value}
-                          onChange={(e) => updateOptionValue(qIndex, oIndex, parseFloat(e.target.value) || 0)}
-                          className="w-16 text-center"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeOption(qIndex, oIndex)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
+                    <label className="text-sm font-medium text-muted-foreground">Options (drag to reorder, scoring: 1-5)</label>
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd(qIndex)}>
+                      <SortableContext items={question.options.map((o) => o.id)} strategy={verticalListSortingStrategy}>
+                        {question.options.map((option, oIndex) => (
+                          <SortableOptionItem
+                            key={option.id}
+                            option={option}
+                            questionIndex={qIndex}
+                            optionIndex={oIndex}
+                            onUpdateText={updateOption}
+                            onUpdateValue={updateOptionValue}
+                            onRemove={removeOption}
+                          />
+                        ))}
+                      </SortableContext>
+                    </DndContext>
                     <Button variant="outline" size="sm" onClick={() => addOption(qIndex)} className="gap-1 mt-1">
                       <Plus className="h-3 w-3" />
                       Add Option
