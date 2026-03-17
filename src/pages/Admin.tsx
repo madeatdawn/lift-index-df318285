@@ -10,6 +10,9 @@ import { toast } from "sonner";
 import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
 import { AdminPasswordGate } from "@/components/AdminPasswordGate";
 import { QuizQuestion, ResultLevel } from "@/types/quiz";
+import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { SortableOptionItem } from "@/components/admin/SortableOptionItem";
 
 const Admin = () => {
   const navigate = useNavigate();
