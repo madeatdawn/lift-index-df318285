@@ -1,27 +1,31 @@
 
 
-## Make Admin Panel Fully Flexible
+## Speed Up Quiz Loading and Redirect
 
-### What changes
+### Current bottlenecks identified
 
-#### 1. Editable option scores (currently locked)
-In the Questions tab, the score value input for each option is currently `disabled`. This will be changed to an editable number input so you can set any score value per option.
+1. **Initial load: 3 sequential database queries** -- `fetchQuizData` fires questions, options, and results queries one after another (each awaited sequentially). This adds up to ~600-900ms on cold loads.
 
-#### 2. Add and remove options per question
-Each question will get an "Add Option" button and each option will get a delete button, so you're not locked into exactly 5 options. A minimum of 2 options per question will be enforced.
+2. **100ms artificial delay before scoring** -- `handleQuizComplete` wraps all logic in `setTimeout(() => { ... }, 100)` just to "show the loading state." This is unnecessary latency.
 
-#### 3. Add and remove result levels
-The Results tab will get an "Add Result" button at the top and a delete button on each result card, matching the pattern already used for questions. A minimum of 1 result will be enforced.
+3. **Up to 3 second wait for Google Sheets logging before redirect** -- The redirect is blocked by `logWithTimeout` which waits up to 3s for the edge function to respond.
 
----
+4. **No caching** -- Every page load re-fetches all quiz data from the database, even though it rarely changes.
 
-### Technical details
+### Changes
 
-**File: `src/pages/Admin.tsx`**
+**`src/hooks/useQuizDatabase.tsx`**
+- Run all 3 database queries in parallel using `Promise.all([questionsQuery, optionsQuery, resultsQuery])` instead of sequentially. Cuts load time by ~60%.
 
-- **Option score editing**: Change the option value `Input` from `disabled` to editable, and add an `updateOptionValue` handler that sets `options[oIndex].value` to the parsed number.
-- **Add/remove options**: Add an `addOption` function that appends a new option with an auto-generated ID (next letter or indexed) and default value. Add a `removeOption` function with a minimum-2 guard. Render a delete button next to each option and an "Add Option" button below the options list.
-- **Add/remove results**: Add an `addResult` function that creates a new result with sensible defaults (empty name, 0-0 score range, empty description/URL). Add a `removeResult` function with a minimum-1 guard. Render a delete button on each result card and an "Add Result" button in the Results tab header.
+**`src/pages/Quiz.tsx`**
+- Remove the `setTimeout(() => { ... }, 100)` wrapper in `handleQuizComplete` -- run scoring immediately.
+- Fire-and-forget the Google Sheets logging: call `fetch()` but don't await it before redirecting. The browser will complete the request in the background. Remove the `Promise.race` / 3s timeout pattern entirely.
 
-No backend or database changes are needed -- the existing edge function and database schema already support variable numbers of options and results.
+**`src/contexts/QuizContext.tsx`**
+- Cache quiz data in `sessionStorage` so subsequent navigations (e.g. user hits back) don't re-fetch. On load: check sessionStorage first, use it immediately, then optionally refresh in background.
+- Set `isLoading` properly during the initial fetch so the quiz doesn't flash a loading state unnecessarily.
+
+### Summary of expected improvements
+- Initial load: ~60% faster (parallel queries + sessionStorage cache)
+- Quiz completion to redirect: near-instant (remove 100ms delay + fire-and-forget logging)
 
