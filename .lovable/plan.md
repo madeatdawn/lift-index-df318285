@@ -1,27 +1,33 @@
+## Prevent "missing package" outages
 
+### What went wrong last time
 
-## Make Admin Panel Fully Flexible
+A previous change added `import` statements for `@dnd-kit/core`, `@dnd-kit/sortable`, and `@dnd-kit/utilities`, but those packages were never added to `package.json`. The TypeScript build failed, the JS bundle broke, and the live site started throwing "Failed to fetch" on every page — which looked like a redirect/database problem but was actually a build problem.
 
-### What changes
+### The fix: a build-health smoke test
 
-#### 1. Editable option scores (currently locked)
-In the Questions tab, the score value input for each option is currently `disabled`. This will be changed to an editable number input so you can set any score value per option.
+Add a tiny Vitest test suite that runs as part of the project's automatic checks. It does two things:
 
-#### 2. Add and remove options per question
-Each question will get an "Add Option" button and each option will get a delete button, so you're not locked into exactly 5 options. A minimum of 2 options per question will be enforced.
+1. **Import-resolution test** — Walks every `.ts`/`.tsx` file under `src/`, extracts every bare-package import (e.g. `@dnd-kit/core`, `framer-motion`), and asserts each one is listed in `package.json`'s `dependencies` or `devDependencies`. If someone adds an import for an uninstalled package, this test fails immediately with a clear message like `"@dnd-kit/core" is imported in src/pages/Admin.tsx but is not in package.json`.
 
-#### 3. Add and remove result levels
-The Results tab will get an "Add Result" button at the top and a delete button on each result card, matching the pattern already used for questions. A minimum of 1 result will be enforced.
+2. **App-mount smoke test** — Renders `<App />` inside the testing-library `jsdom` environment with mocked router and Supabase client, and asserts it mounts without throwing. This catches the second class of failure — code that compiles but blows up at runtime on first render.
 
----
+### Files to add
 
-### Technical details
+- `vitest.config.ts` — standard Vitest + React + jsdom setup (only if not already present)
+- `src/test/setup.ts` — `@testing-library/jest-dom` + `matchMedia` polyfill
+- `src/test/imports.test.ts` — the import-resolution guardrail
+- `src/test/app-mount.test.tsx` — the smoke test
 
-**File: `src/pages/Admin.tsx`**
+### Dev dependencies to add
 
-- **Option score editing**: Change the option value `Input` from `disabled` to editable, and add an `updateOptionValue` handler that sets `options[oIndex].value` to the parsed number.
-- **Add/remove options**: Add an `addOption` function that appends a new option with an auto-generated ID (next letter or indexed) and default value. Add a `removeOption` function with a minimum-2 guard. Render a delete button next to each option and an "Add Option" button below the options list.
-- **Add/remove results**: Add an `addResult` function that creates a new result with sensible defaults (empty name, 0-0 score range, empty description/URL). Add a `removeResult` function with a minimum-1 guard. Render a delete button on each result card and an "Add Result" button in the Results tab header.
+`vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `jsdom` (only the ones not already installed).
 
-No backend or database changes are needed -- the existing edge function and database schema already support variable numbers of options and results.
+### How this protects you
 
+These tests run automatically on every change. If a future edit imports a package that isn't installed — or breaks the app's initial render — the check fails before the change is shipped, and you'll see the real error ("missing package X") instead of a mysterious "Failed to fetch" on the live site.
+
+### Out of scope
+
+- No changes to quiz logic, admin panel, or database.
+- No changes to the existing `src/lib/liftScoring.test.ts`.
