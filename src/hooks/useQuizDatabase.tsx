@@ -1,6 +1,19 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import { QuizData, QuizQuestion, QuizOption, ResultLevel } from "@/types/quiz";
+
+const publicQuizClient = createClient<Database>(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  }
+);
 
 export const useQuizDatabase = () => {
   const [loading, setLoading] = useState(true);
@@ -13,9 +26,9 @@ export const useQuizDatabase = () => {
 
       // Fetch all data in parallel
       const [questionsResult, optionsResult, resultsResult] = await Promise.all([
-        supabase.from("quiz_questions").select("*").order("sort_order"),
-        supabase.from("quiz_options").select("*").order("sort_order"),
-        supabase.from("quiz_results").select("*").order("sort_order"),
+        publicQuizClient.from("quiz_questions").select("*").order("sort_order"),
+        publicQuizClient.from("quiz_options").select("*").order("sort_order"),
+        publicQuizClient.from("quiz_results").select("*").order("sort_order"),
       ]);
 
       if (questionsResult.error) throw questionsResult.error;
@@ -65,6 +78,8 @@ export const useQuizDatabase = () => {
       setError(null);
 
       // Use edge function for admin operations (bypasses RLS with service role)
+      const { supabase } = await import("@/integrations/supabase/client");
+
       const { data, error: fnError } = await supabase.functions.invoke('admin-quiz', {
         body: {
           action: 'save',

@@ -20,6 +20,30 @@ const LEVEL_MAP: Record<number, string> = {
   5: 'significance'
 };
 
+const DEFAULT_RESULT_REDIRECTS: Record<string, string> = {
+  seeking: 'https://elanoura.com/seeking',
+  striving: 'https://elanoura.com/striving',
+  steadfast: 'https://elanoura.com/steadfast',
+  shining: 'https://elanoura.com/shining',
+  significance: 'https://elanoura.com/significance',
+};
+
+const getRedirectUrl = (levelId?: string, configuredUrl?: string) => {
+  if (configuredUrl) {
+    try {
+      const resolvedUrl = new URL(configuredUrl, 'https://elanoura.com');
+
+      if (resolvedUrl.protocol === 'http:' || resolvedUrl.protocol === 'https:') {
+        return resolvedUrl.toString();
+      }
+    } catch {
+      // Fall through to deterministic level-based defaults.
+    }
+  }
+
+  return (levelId && DEFAULT_RESULT_REDIRECTS[levelId]) || 'https://elanoura.com';
+};
+
 // Map referrer hostnames to friendly source names
 const mapReferrerToSource = (referrer: string): string => {
   try {
@@ -176,9 +200,7 @@ const Quiz = () => {
       redirectUrl: result?.redirectUrl,
     });
 
-    const redirectUrl = (result?.redirectUrl && result.redirectUrl.startsWith("https://"))
-      ? result.redirectUrl
-      : "https://elanoura.com";
+    const redirectUrl = getRedirectUrl(levelId, result?.redirectUrl);
 
     // Fire-and-forget: log to Google Sheets in background, don't block redirect
     fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/log-quiz-completion`, {
@@ -197,7 +219,7 @@ const Quiz = () => {
 
     // Redirect immediately
     resetAnswers();
-    window.location.href = redirectUrl;
+    window.location.assign(redirectUrl);
   };
 
   // Show redirecting state
