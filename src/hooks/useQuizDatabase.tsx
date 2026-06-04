@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { supabase } from "@/integrations/supabase/client";
 import { QuizData, QuizQuestion, QuizOption, ResultLevel } from "@/types/quiz";
 
 const publicQuizClient = createClient<Database>(
@@ -78,8 +79,6 @@ export const useQuizDatabase = () => {
       setError(null);
 
       // Use edge function for admin operations (bypasses RLS with service role)
-      const { supabase } = await import("@/integrations/supabase/client");
-
       const { data, error: fnError } = await supabase.functions.invoke('admin-quiz', {
         body: {
           action: 'save',
