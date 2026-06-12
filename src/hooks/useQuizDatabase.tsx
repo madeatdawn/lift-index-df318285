@@ -78,6 +78,16 @@ export const useQuizDatabase = () => {
       setLoading(true);
       setError(null);
 
+      // Client-side validation guard. The edge function ALSO validates — this is
+      // just a fast-fail so the admin sees specific errors before we hit the network.
+      const { validateQuizDataForSave } = await import("@/lib/resolveResult");
+      const check = validateQuizDataForSave(quizData);
+      if (!check.valid) {
+        const msg = `Cannot save: ${check.errors.join("; ")}`;
+        setError(msg);
+        throw new Error(msg);
+      }
+
       // Use edge function for admin operations (bypasses RLS with service role)
       const { data, error: fnError } = await supabase.functions.invoke('admin-quiz', {
         body: {
@@ -90,6 +100,10 @@ export const useQuizDatabase = () => {
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
 
+      // Bust the client cache so the next quiz load picks up the new config
+      // immediately instead of serving stale results.
+      try { sessionStorage.removeItem('quizData'); } catch { /* ignore */ }
+
       return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to save quiz data";
@@ -99,6 +113,7 @@ export const useQuizDatabase = () => {
       setLoading(false);
     }
   };
+
 
   return {
     fetchQuizData,
