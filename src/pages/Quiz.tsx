@@ -159,7 +159,9 @@ const Quiz = () => {
       return;
     }
 
+    const resolution = resolveRedirectForScore(score, quizData.results);
     const levelId = resolution.result?.id;
+
     const result = resolution.result;
 
     console.info("[LIFT] Quiz complete", {
