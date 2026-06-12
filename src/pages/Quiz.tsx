@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "@/contexts/QuizContext";
 import { calculateLiftScore } from "@/lib/liftScoring";
+import { resolveRedirectForScore } from "@/lib/resolveResult";
 
 import type { UserAnswer } from "@/types/quiz";
 import { Button } from "@/components/ui/button";
@@ -11,38 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import elanourIcon from "@/assets/elanoura-icon.svg";
 
-// Direct mapping from score to level ID
-const LEVEL_MAP: Record<number, string> = {
-  1: 'seeking',
-  2: 'striving',
-  3: 'steadfast',
-  4: 'shining',
-  5: 'significance'
-};
 
-const DEFAULT_RESULT_REDIRECTS: Record<string, string> = {
-  seeking: 'https://elanoura.com/seeking',
-  striving: 'https://elanoura.com/striving',
-  steadfast: 'https://elanoura.com/steadfast',
-  shining: 'https://elanoura.com/shining',
-  significance: 'https://elanoura.com/significance',
-};
-
-const getRedirectUrl = (levelId?: string, configuredUrl?: string) => {
-  if (configuredUrl) {
-    try {
-      const resolvedUrl = new URL(configuredUrl, 'https://elanoura.com');
-
-      if (resolvedUrl.protocol === 'http:' || resolvedUrl.protocol === 'https:') {
-        return resolvedUrl.toString();
-      }
-    } catch {
-      // Fall through to deterministic level-based defaults.
-    }
-  }
-
-  return (levelId && DEFAULT_RESULT_REDIRECTS[levelId]) || 'https://elanoura.com';
-};
 
 // Map referrer hostnames to friendly source names
 const mapReferrerToSource = (referrer: string): string => {
@@ -189,18 +159,22 @@ const Quiz = () => {
       return;
     }
 
-    const levelId = LEVEL_MAP[score];
-    const result = quizData.results.find((r) => r.id === levelId);
+    const resolution = resolveRedirectForScore(score, quizData.results);
+    const levelId = resolution.result?.id;
+
+    const result = resolution.result;
 
     console.info("[LIFT] Quiz complete", {
       rawValues: answersSnapshot.map((a) => a.value),
       score,
       levelId,
       matchedResultId: result?.id,
-      redirectUrl: result?.redirectUrl,
+      redirectUrl: resolution.url,
+      usedFallback: resolution.usedFallback,
     });
 
-    const redirectUrl = getRedirectUrl(levelId, result?.redirectUrl);
+    const redirectUrl = resolution.url;
+
 
     // Log to Google Sheets — keepalive ensures the request survives the navigation
     // that happens on the next line. Without keepalive, the browser cancels the
