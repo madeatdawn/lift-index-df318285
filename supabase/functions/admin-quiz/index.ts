@@ -97,10 +97,22 @@ serve(async (req) => {
     }
 
     if (action === 'save') {
+      // Server-side validation — refuse to persist anything that breaks the
+      // redirect contract (missing levels, invalid URLs, gaps, bad values).
+      const validationErrors = validateQuizData(quizData);
+      if (validationErrors.length > 0) {
+        console.error("Quiz data validation failed:", validationErrors);
+        return new Response(
+          JSON.stringify({ error: `Validation failed: ${validationErrors.join("; ")}` }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       console.log("Saving quiz data...", { 
         questionsCount: quizData.questions?.length,
         resultsCount: quizData.results?.length 
       });
+
 
       // Delete existing data using service role - use gte on sort_order to match all rows
       const { error: deleteOptionsError } = await supabaseAdmin
