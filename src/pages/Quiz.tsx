@@ -159,18 +159,20 @@ const Quiz = () => {
       return;
     }
 
-    const levelId = LEVEL_MAP[score];
-    const result = quizData.results.find((r) => r.id === levelId);
+    const levelId = resolution.result?.id;
+    const result = resolution.result;
 
     console.info("[LIFT] Quiz complete", {
       rawValues: answersSnapshot.map((a) => a.value),
       score,
       levelId,
       matchedResultId: result?.id,
-      redirectUrl: result?.redirectUrl,
+      redirectUrl: resolution.url,
+      usedFallback: resolution.usedFallback,
     });
 
-    const redirectUrl = getRedirectUrl(levelId, result?.redirectUrl);
+    const redirectUrl = resolution.url;
+
 
     // Log to Google Sheets — keepalive ensures the request survives the navigation
     // that happens on the next line. Without keepalive, the browser cancels the
