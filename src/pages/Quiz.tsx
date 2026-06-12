@@ -202,20 +202,27 @@ const Quiz = () => {
 
     const redirectUrl = getRedirectUrl(levelId, result?.redirectUrl);
 
-    // Fire-and-forget: log to Google Sheets in background, don't block redirect
-    fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/log-quiz-completion`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-      },
-      body: JSON.stringify({
-        answers: answersSnapshot.map((a) => a.value),
-        result: result?.name || levelId,
-        timestamp: new Date().toISOString(),
-        source: trafficSource.current,
-      }),
-    }).catch((err) => console.warn("[LIFT] Sheet logging failed:", err));
+    // Log to Google Sheets — keepalive ensures the request survives the navigation
+    // that happens on the next line. Without keepalive, the browser cancels the
+    // in-flight fetch on window.location.assign and the log never arrives.
+    try {
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/log-quiz-completion`, {
+        method: 'POST',
+        keepalive: true,
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({
+          answers: answersSnapshot.map((a) => a.value),
+          result: result?.name || levelId,
+          timestamp: new Date().toISOString(),
+          source: trafficSource.current,
+        }),
+      }).catch((err) => console.warn("[LIFT] Sheet logging failed:", err));
+    } catch (err) {
+      console.warn("[LIFT] Sheet logging threw:", err);
+    }
 
     // Redirect immediately
     resetAnswers();
