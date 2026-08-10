@@ -3,6 +3,7 @@ import { QuizData, UserAnswer } from "@/types/quiz";
 import { initialQuizData } from "@/data/quizData";
 import { useQuizDatabase } from "@/hooks/useQuizDatabase";
 import { calculateLiftScore } from "@/lib/liftScoring";
+import { isUsableQuizData } from "@/lib/resolveResult";
 import { toast } from "sonner";
 
 interface QuizContextType {
@@ -23,7 +24,13 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
     // Load cached quiz data from sessionStorage for instant rendering
     const cached = sessionStorage.getItem('quizData');
     if (cached) {
-      try { return JSON.parse(cached); } catch { /* fall through */ }
+      try {
+        const parsed: unknown = JSON.parse(cached);
+        if (isUsableQuizData(parsed)) return parsed as QuizData;
+        sessionStorage.removeItem('quizData');
+      } catch {
+        sessionStorage.removeItem('quizData');
+      }
     }
     return initialQuizData;
   });
@@ -45,7 +52,7 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
   const loadQuizData = async () => {
     const data = await fetchQuizData();
     
-    if (data && data.questions.length > 0) {
+    if (data && isUsableQuizData(data)) {
       setQuizData(data);
       sessionStorage.setItem('quizData', JSON.stringify(data));
     }
