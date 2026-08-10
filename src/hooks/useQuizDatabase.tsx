@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { QuizData, QuizQuestion, QuizOption, ResultLevel } from "@/types/quiz";
+import { isUsableQuizData, validateQuizDataForSave } from "@/lib/resolveResult";
 
 const publicQuizClient = createClient<Database>(
   import.meta.env.VITE_SUPABASE_URL,
@@ -63,7 +64,12 @@ export const useQuizDatabase = () => {
         redirectUrl: r.redirect_url,
       }));
 
-      return { questions, results };
+      const quizData = { questions, results };
+      if (!isUsableQuizData(quizData)) {
+        throw new Error("The live quiz configuration is incomplete; using the safe bundled version");
+      }
+
+      return quizData;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to fetch quiz data";
       setError(message);
@@ -80,7 +86,6 @@ export const useQuizDatabase = () => {
 
       // Client-side validation guard. The edge function ALSO validates — this is
       // just a fast-fail so the admin sees specific errors before we hit the network.
-      const { validateQuizDataForSave } = await import("@/lib/resolveResult");
       const check = validateQuizDataForSave(quizData);
       if (!check.valid) {
         const msg = `Cannot save: ${check.errors.join("; ")}`;

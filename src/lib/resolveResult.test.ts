@@ -5,6 +5,7 @@ import {
   validateQuizDataForSave,
   isSafeAbsoluteUrl,
   SAFE_REDIRECTS_BY_SCORE,
+  isUsableQuizData,
 } from "./resolveResult";
 import { initialQuizData } from "@/data/quizData";
 
@@ -113,5 +114,19 @@ describe("validateQuizDataForSave", () => {
     const r = validateQuizDataForSave(reallyBad);
     expect(r.valid).toBe(false);
     expect(r.errors.join("\n")).toMatch(/score 3/);
+  });
+});
+
+describe("isUsableQuizData", () => {
+  it("rejects a partial live response with no results", () => {
+    expect(isUsableQuizData({ questions: initialQuizData.questions, results: [] })).toBe(false);
+  });
+
+  it("rejects a stale cached response with broken redirects", () => {
+    const stale = {
+      ...initialQuizData,
+      results: initialQuizData.results.map((result) => ({ ...result, redirectUrl: "" })),
+    };
+    expect(isUsableQuizData(stale)).toBe(false);
   });
 });

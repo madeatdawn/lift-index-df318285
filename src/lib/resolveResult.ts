@@ -97,6 +97,13 @@ export interface QuizDataValidationResult {
 }
 
 /**
+ * Runtime guard for cached and remotely fetched quiz configuration. Invalid or
+ * partial data must never replace the bundled, known-good quiz configuration.
+ */
+export const isUsableQuizData = (data: unknown): boolean =>
+  validateQuizDataForSave(data).valid;
+
+/**
  * Validate a full quizData payload before persisting it. Rejects anything that
  * would silently break the redirect contract: missing levels, invalid URLs,
  * out-of-range option values, gaps/overlaps in score bands.
