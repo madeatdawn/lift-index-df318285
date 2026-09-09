@@ -74,21 +74,19 @@ export interface RedirectResolution {
 }
 
 /**
- * Resolve the final, guaranteed-valid redirect URL for a quiz score.
- * Order: data-driven result.redirectUrl → safe per-score default → elanoura.com.
+ * Resolve the final, guaranteed-valid redirect URL for a quiz score. Public
+ * redirects are bundled application behavior, not remote configuration, so a
+ * Cloud timeout or partial response can never change or prevent navigation.
  */
 export const resolveRedirectForScore = (
   score: number,
   results: ResultLevel[]
 ): RedirectResolution => {
   const result = resolveResultByScore(score, results);
-  if (result && isSafeAbsoluteUrl(result.redirectUrl)) {
-    return { url: result.redirectUrl, result, usedFallback: false };
-  }
   const rounded = Math.round(score);
-  const fallback =
+  const url =
     SAFE_REDIRECTS_BY_SCORE[rounded] || "https://elanoura.com";
-  return { url: fallback, result, usedFallback: true };
+  return { url, result, usedFallback: !result || result.redirectUrl !== url };
 };
 
 export interface QuizDataValidationResult {

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 import { QuizData, UserAnswer } from "@/types/quiz";
 import { initialQuizData } from "@/data/quizData";
 import { useQuizDatabase } from "@/hooks/useQuizDatabase";
@@ -8,7 +9,7 @@ import { toast } from "sonner";
 
 interface QuizContextType {
   quizData: QuizData;
-  updateQuizData: (data: QuizData) => void;
+  updateQuizData: (data: QuizData) => Promise<boolean>;
   userAnswers: UserAnswer[];
   addAnswer: (answer: UserAnswer) => void;
   removeLastAnswer: () => void;
@@ -19,54 +20,62 @@ interface QuizContextType {
 
 const QuizContext = createContext<QuizContextType | undefined>(undefined);
 
+const copyQuizData = (data: QuizData): QuizData =>
+  JSON.parse(JSON.stringify(data)) as QuizData;
+
 export const QuizProvider = ({ children }: { children: ReactNode }) => {
-  const [quizData, setQuizData] = useState<QuizData>(() => {
-    // Load cached quiz data from sessionStorage for instant rendering
-    const cached = sessionStorage.getItem('quizData');
-    if (cached) {
-      try {
-        const parsed: unknown = JSON.parse(cached);
-        if (isUsableQuizData(parsed)) return parsed as QuizData;
-        sessionStorage.removeItem('quizData');
-      } catch {
-        sessionStorage.removeItem('quizData');
-      }
-    }
-    return initialQuizData;
-  });
+  const location = useLocation();
+  const isAdminRoute = location.pathname === "/admin";
+  // Public quiz data is bundled with the app. Cloud availability must never be
+  // able to delay, replace, or invalidate an assessment already in progress.
+  const [quizData, setQuizData] = useState<QuizData>(() => copyQuizData(initialQuizData));
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>(() => {
-    const saved = localStorage.getItem('quizAnswers');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('quizAnswers');
+      const parsed: unknown = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed as UserAnswer[] : [];
+    } catch {
+      localStorage.removeItem('quizAnswers');
+      return [];
+    }
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(isAdminRoute);
   const { fetchQuizData, saveQuizData } = useQuizDatabase();
 
   useEffect(() => {
-    loadQuizData();
-  }, []);
+    if (!isAdminRoute) {
+      setQuizData(copyQuizData(initialQuizData));
+      setIsLoading(false);
+      return;
+    }
+
+    let active = true;
+    setIsLoading(true);
+    void fetchQuizData().then((data) => {
+      if (!active) return;
+      if (data && isUsableQuizData(data)) setQuizData(copyQuizData(data));
+      setIsLoading(false);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [isAdminRoute]);
 
   useEffect(() => {
     localStorage.setItem('quizAnswers', JSON.stringify(userAnswers));
   }, [userAnswers]);
 
-  const loadQuizData = async () => {
-    const data = await fetchQuizData();
-    
-    if (data && isUsableQuizData(data)) {
-      setQuizData(data);
-      sessionStorage.setItem('quizData', JSON.stringify(data));
-    }
-  };
-
   const updateQuizData = async (data: QuizData) => {
-    setQuizData(data);
     const success = await saveQuizData(data);
     
     if (success) {
+      setQuizData(copyQuizData(data));
       toast.success("Quiz data saved successfully!");
     } else {
       toast.error("Failed to save quiz data. Please try again.");
     }
+    return success;
   };
 
   const addAnswer = (answer: UserAnswer) => {

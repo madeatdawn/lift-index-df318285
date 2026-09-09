@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 
 // Mock the Supabase client to avoid network calls during smoke test
 vi.mock("@/integrations/supabase/client", () => ({
@@ -21,9 +21,28 @@ vi.mock("@/integrations/supabase/client", () => ({
   },
 }));
 
+const fetchQuizData = vi.fn(() => new Promise<null>(() => {}));
+
+vi.mock("@/hooks/useQuizDatabase", () => ({
+  useQuizDatabase: () => ({
+    fetchQuizData,
+    saveQuizData: vi.fn(),
+    loading: false,
+    error: null,
+  }),
+}));
+
 describe("app mount smoke test", () => {
   it("App renders without throwing", async () => {
     const { default: App } = await import("../App");
     expect(() => render(<App />)).not.toThrow();
+  });
+
+  it("starts from bundled data without requesting or waiting for Cloud", async () => {
+    const { default: App } = await import("../App");
+    render(<App />);
+
+    expect(await screen.findByRole("button", { name: "Start Your Assessment" })).toBeVisible();
+    expect(fetchQuizData).not.toHaveBeenCalled();
   });
 });
