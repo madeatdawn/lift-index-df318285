@@ -1,33 +1,22 @@
-## Prevent "missing package" outages
+# Permanent Cloud-independent quiz
 
-### What went wrong last time
+## Goal
+The public assessment must start, score, and redirect correctly even when Lovable Cloud is starting, unavailable, or times out.
 
-A previous change added `import` statements for `@dnd-kit/core`, `@dnd-kit/sortable`, and `@dnd-kit/utilities`, but those packages were never added to `package.json`. The TypeScript build failed, the JS bundle broke, and the live site started throwing "Failed to fetch" on every page — which looked like a redirect/database problem but was actually a build problem.
+## Changes
+- Make the bundled quiz and five redirect destinations the authoritative public runtime data.
+- Stop replacing an in-progress public quiz with late Cloud responses.
+- Restrict Cloud reads and saves to the admin experience; public visitors will never wait on Cloud.
+- Keep completion logging best-effort so a logging outage can never block the result redirect.
+- Add outage regression tests that simulate failed and indefinitely pending Cloud requests and prove the quiz still starts and resolves every result.
 
-### The fix: a build-health smoke test
+## Technical details
+- Split public runtime state from admin synchronization in the quiz context.
+- Resolve redirects from immutable bundled destinations by score, rather than remotely editable values.
+- Preserve existing admin editing and Cloud persistence, but apply saved changes locally only after a successful save.
+- Add a redirect navigation seam for deterministic browser tests without changing visible behavior.
 
-Add a tiny Vitest test suite that runs as part of the project's automatic checks. It does two things:
-
-1. **Import-resolution test** — Walks every `.ts`/`.tsx` file under `src/`, extracts every bare-package import (e.g. `@dnd-kit/core`, `framer-motion`), and asserts each one is listed in `package.json`'s `dependencies` or `devDependencies`. If someone adds an import for an uninstalled package, this test fails immediately with a clear message like `"@dnd-kit/core" is imported in src/pages/Admin.tsx but is not in package.json`.
-
-2. **App-mount smoke test** — Renders `<App />` inside the testing-library `jsdom` environment with mocked router and Supabase client, and asserts it mounts without throwing. This catches the second class of failure — code that compiles but blows up at runtime on first render.
-
-### Files to add
-
-- `vitest.config.ts` — standard Vitest + React + jsdom setup (only if not already present)
-- `src/test/setup.ts` — `@testing-library/jest-dom` + `matchMedia` polyfill
-- `src/test/imports.test.ts` — the import-resolution guardrail
-- `src/test/app-mount.test.tsx` — the smoke test
-
-### Dev dependencies to add
-
-`vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `jsdom` (only the ones not already installed).
-
-### How this protects you
-
-These tests run automatically on every change. If a future edit imports a package that isn't installed — or breaks the app's initial render — the check fails before the change is shipped, and you'll see the real error ("missing package X") instead of a mysterious "Failed to fetch" on the live site.
-
-### Out of scope
-
-- No changes to quiz logic, admin panel, or database.
-- No changes to the existing `src/lib/liftScoring.test.ts`.
+## Verification
+- Run the complete test suite.
+- Test the quiz in the browser while Cloud is still starting.
+- Confirm all five scores produce valid destinations and no Cloud request can delay navigation.
