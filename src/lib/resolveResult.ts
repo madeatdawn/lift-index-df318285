@@ -1,10 +1,8 @@
 import { ResultLevel } from "@/types/quiz";
 
 /**
- * Hardcoded, last-resort redirect URLs by integer score (1-5).
- * Only used if the database has no matching result OR its redirectUrl is invalid.
- * These five level IDs are the fixed contract — admins can edit text/URLs but
- * cannot delete or rename levels without breaking redirects.
+ * Canonical public redirect URLs by integer score (1-5). These destinations
+ * ship with the app so result navigation never depends on Cloud availability.
  */
 export const SAFE_REDIRECTS_BY_SCORE: Record<number, string> = {
   1: "https://elanoura.com/seeking",

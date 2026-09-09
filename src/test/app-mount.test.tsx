@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, it, expect, vi } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
 
 // Mock the Supabase client to avoid network calls during smoke test
 vi.mock("@/integrations/supabase/client", () => ({
@@ -33,6 +33,12 @@ vi.mock("@/hooks/useQuizDatabase", () => ({
 }));
 
 describe("app mount smoke test", () => {
+  beforeEach(() => {
+    cleanup();
+    fetchQuizData.mockClear();
+    window.localStorage.clear();
+  });
+
   it("App renders without throwing", async () => {
     const { default: App } = await import("../App");
     expect(() => render(<App />)).not.toThrow();
