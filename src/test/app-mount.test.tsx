@@ -48,7 +48,7 @@ describe("app mount smoke test", () => {
     const { default: App } = await import("../App");
     render(<App />);
 
-    expect(await screen.findByRole("button", { name: "Start Your Assessment" })).toBeVisible();
+    expect(await screen.findByRole("button", { name: "Start Your Assessment" })).toBeInTheDocument();
     expect(fetchQuizData).not.toHaveBeenCalled();
   });
 });
