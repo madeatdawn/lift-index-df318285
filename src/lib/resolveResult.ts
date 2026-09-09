@@ -1,10 +1,8 @@
 import { ResultLevel } from "@/types/quiz";
 
 /**
- * Hardcoded, last-resort redirect URLs by integer score (1-5).
- * Only used if the database has no matching result OR its redirectUrl is invalid.
- * These five level IDs are the fixed contract — admins can edit text/URLs but
- * cannot delete or rename levels without breaking redirects.
+ * Canonical public redirect URLs by integer score (1-5). These destinations
+ * ship with the app so result navigation never depends on Cloud availability.
  */
 export const SAFE_REDIRECTS_BY_SCORE: Record<number, string> = {
   1: "https://elanoura.com/seeking",
@@ -74,21 +72,19 @@ export interface RedirectResolution {
 }
 
 /**
- * Resolve the final, guaranteed-valid redirect URL for a quiz score.
- * Order: data-driven result.redirectUrl → safe per-score default → elanoura.com.
+ * Resolve the final, guaranteed-valid redirect URL for a quiz score. Public
+ * redirects are bundled application behavior, not remote configuration, so a
+ * Cloud timeout or partial response can never change or prevent navigation.
  */
 export const resolveRedirectForScore = (
   score: number,
   results: ResultLevel[]
 ): RedirectResolution => {
   const result = resolveResultByScore(score, results);
-  if (result && isSafeAbsoluteUrl(result.redirectUrl)) {
-    return { url: result.redirectUrl, result, usedFallback: false };
-  }
   const rounded = Math.round(score);
-  const fallback =
+  const url =
     SAFE_REDIRECTS_BY_SCORE[rounded] || "https://elanoura.com";
-  return { url: fallback, result, usedFallback: true };
+  return { url, result, usedFallback: !result || result.redirectUrl !== url };
 };
 
 export interface QuizDataValidationResult {

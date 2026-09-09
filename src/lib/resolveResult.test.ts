@@ -36,19 +36,25 @@ describe("resolveResultByScore", () => {
 });
 
 describe("resolveRedirectForScore", () => {
-  it("uses configured URL when valid", () => {
+  it("uses the bundled destination for a valid result", () => {
     const out = resolveRedirectForScore(3, initialQuizData.results);
     expect(out.url).toBe("https://elanoura.com/steadfast");
     expect(out.usedFallback).toBe(false);
   });
 
-  it("uses safe per-score fallback when redirectUrl is invalid", () => {
+  it("ignores a remotely configured redirect URL", () => {
     const broken = initialQuizData.results.map((r) =>
-      r.id === "shining" ? { ...r, redirectUrl: "not-a-url" } : r
+      r.id === "shining" ? { ...r, redirectUrl: "https://wrong.example/result" } : r
     );
     const out = resolveRedirectForScore(4, broken);
     expect(out.url).toBe(SAFE_REDIRECTS_BY_SCORE[4]);
     expect(out.usedFallback).toBe(true);
+  });
+
+  it("resolves all five destinations without any Cloud results", () => {
+    for (const score of [1, 2, 3, 4, 5]) {
+      expect(resolveRedirectForScore(score, []).url).toBe(SAFE_REDIRECTS_BY_SCORE[score]);
+    }
   });
 
   it("never returns a non-http(s) URL", () => {
