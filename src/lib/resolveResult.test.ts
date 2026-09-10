@@ -38,7 +38,7 @@ describe("resolveResultByScore", () => {
 describe("resolveRedirectForScore", () => {
   it("uses the bundled destination for a valid result", () => {
     const out = resolveRedirectForScore(3, initialQuizData.results);
-    expect(out.url).toBe("https://elanoura.com/steadfast");
+    expect(out.url).toBe("https://elanoura.myflodesk.com/your-results");
     expect(out.usedFallback).toBe(false);
   });
 

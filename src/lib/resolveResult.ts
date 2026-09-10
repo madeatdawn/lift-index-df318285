@@ -5,11 +5,11 @@ import { ResultLevel } from "@/types/quiz";
  * ship with the app so result navigation never depends on Cloud availability.
  */
 export const SAFE_REDIRECTS_BY_SCORE: Record<number, string> = {
-  1: "https://elanoura.com/seeking",
-  2: "https://elanoura.com/striving",
-  3: "https://elanoura.com/steadfast",
-  4: "https://elanoura.com/shining",
-  5: "https://elanoura.com/significance",
+  1: "https://elanoura.myflodesk.com/view-results",
+  2: "https://elanoura.myflodesk.com/result",
+  3: "https://elanoura.myflodesk.com/your-results",
+  4: "https://elanoura.myflodesk.com/view-result",
+  5: "https://elanoura.myflodesk.com/access-results",
 };
 
 export const EXPECTED_RESULT_IDS = [

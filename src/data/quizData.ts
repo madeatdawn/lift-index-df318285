@@ -110,7 +110,7 @@ export const initialQuizData: QuizData = {
       maxScore: 1.5,
       description: "Exploring, curious, discovering what lights you up.",
       embedHTML: "",
-      redirectUrl: "https://elanoura.com/seeking"
+      redirectUrl: "https://elanoura.myflodesk.com/view-results"
     },
     {
       id: "striving",
@@ -119,7 +119,7 @@ export const initialQuizData: QuizData = {
       maxScore: 2.5,
       description: "Working hard, building momentum, seeking focus.",
       embedHTML: "",
-      redirectUrl: "https://elanoura.com/striving"
+      redirectUrl: "https://elanoura.myflodesk.com/result"
     },
     {
       id: "steadfast",
@@ -128,7 +128,7 @@ export const initialQuizData: QuizData = {
       maxScore: 3.5,
       description: "Stable, competent, ready for deeper meaning and authentic growth.",
       embedHTML: "",
-      redirectUrl: "https://elanoura.com/steadfast"
+      redirectUrl: "https://elanoura.myflodesk.com/your-results"
     },
     {
       id: "shining",
@@ -137,7 +137,7 @@ export const initialQuizData: QuizData = {
       maxScore: 4.5,
       description: "Experienced, aligned, mastering skills, stepping into authentic expression.",
       embedHTML: "",
-      redirectUrl: "https://elanoura.com/shining"
+      redirectUrl: "https://elanoura.myflodesk.com/view-result"
     },
     {
       id: "significance",
@@ -146,7 +146,7 @@ export const initialQuizData: QuizData = {
       maxScore: 5.0,
       description: "Fully living purpose, mentoring, leaving lasting impact.",
       embedHTML: "",
-      redirectUrl: "https://elanoura.com/significance"
+      redirectUrl: "https://elanoura.myflodesk.com/access-results"
     }
   ]
 };
